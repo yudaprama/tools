@@ -8,7 +8,7 @@ import (
 
 	"github.com/kawai-network/veridium/pkg/fantasy"
 	"github.com/getkawai/tools"
-	"github.com/kawai-network/veridium/internal/search"
+	"github.com/getkawai/tools/search"
 )
 
 // WebSearchInput defines input for web search tool
