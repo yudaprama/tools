@@ -11,11 +11,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
-	"github.com/kawai-network/veridium/internal/image"
-	"github.com/kawai-network/x/paths"
-	"github.com/kawai-network/veridium/pkg/fantasy"
 	"github.com/getkawai/tools"
+	"github.com/getkawai/tools/image"
+	"github.com/google/uuid"
+	"github.com/kawai-network/veridium/pkg/fantasy"
 )
 
 // Text2ImageInput defines input for text2image tool
@@ -50,7 +49,7 @@ type ImageDesignerService struct {
 
 // NewImageDesignerService creates a new image designer service
 func NewImageDesignerService() *ImageDesignerService {
-	outputDir := paths.StableDiffusionOutputs()
+	outputDir := defaultImageOutputDir()
 	os.MkdirAll(outputDir, 0755)
 
 	return &ImageDesignerService{
@@ -258,6 +257,14 @@ func parseDallESize(size string) (int, int) {
 	default:
 		return 1024, 1024
 	}
+}
+
+func defaultImageOutputDir() string {
+	base := os.Getenv("KAWAI_TOOLS_OUTPUT_DIR")
+	if base == "" {
+		base = filepath.Join(os.TempDir(), "kawai-tools", "images")
+	}
+	return base
 }
 
 // truncateString truncates a string to max length
