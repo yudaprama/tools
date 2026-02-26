@@ -28,6 +28,8 @@ github.com/duckdb/duckdb-go-bindings/lib/windows-amd64 v0.3.3 h1:SK2sunA/MPb2T31
 github.com/duckdb/duckdb-go-bindings/lib/windows-amd64 v0.3.3/go.mod h1:K25pJL26ARblGDeuAkrdblFvUen92+CwksLtPEHRqqQ=
 github.com/duckdb/duckdb-go/v2 v2.5.5 h1:TlK8ipnzoKW2aNrjGqRkFWLCDpJDxR/VwH8ezEcvVhw=
 github.com/duckdb/duckdb-go/v2 v2.5.5/go.mod h1:6uIbC3gz36NCEygECzboygOo/Z9TeVwox/puG+ohWV0=
+github.com/getkawai/database v0.1.1 h1:vA2A1Y2EOQC6bNChBveMkWOPZM0VU89LVe3TfpvtdLc=
+github.com/getkawai/database v0.1.1/go.mod h1:x4b2XtZ5gyM8oxWXp3L76CdP8o5zo04eSlW1etfE3IY=
 github.com/getkawai/unillm v0.1.1 h1:Y77gVMNS990xsELknrtDjY6C7Yt6YY8NbhdVwyM1tCk=
 github.com/getkawai/unillm v0.1.1/go.mod h1:vGzh5s0pBFJ2M0ywakzrLNhHlwKNwgX1J/qME6HEeM0=
 github.com/go-json-experiment/json v0.0.0-20251027170946-4849db3c2f7e h1:Lf/gRkoycfOBPa42vU2bbgPurFong6zXeFtPoxholzU=

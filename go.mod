@@ -7,6 +7,7 @@ require (
 	github.com/Knetic/govaluate v3.0.0+incompatible
 	github.com/andybalholm/brotli v1.2.0
 	github.com/duckdb/duckdb-go/v2 v2.5.5
+	github.com/getkawai/database v0.1.1
 	github.com/getkawai/unillm v0.1.1
 	github.com/google/uuid v1.6.0
 	github.com/kawai-network/veridium v0.0.0-20260223154704-91e538e31def

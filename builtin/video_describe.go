@@ -11,7 +11,7 @@ import (
 
 	"github.com/getkawai/unillm"
 	"github.com/getkawai/tools"
-	db "github.com/kawai-network/veridium/internal/database/generated"
+	"github.com/getkawai/database/db"
 )
 
 // VideoDescribeInput defines input for video describe tool
