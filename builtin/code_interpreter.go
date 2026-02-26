@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kawai-network/veridium/pkg/fantasy"
+	"github.com/getkawai/unillm"
 	"github.com/getkawai/tools"
 )
 
@@ -218,25 +218,25 @@ func escapeCode(code string) string {
 func RegisterCodeInterpreter(registry *tools.ToolRegistry) error {
 	service := NewCodeInterpreterService()
 
-	tool := fantasy.NewAgentTool("lobe-code-interpreter__python",
+	tool := unillm.NewAgentTool("lobe-code-interpreter__python",
 		"Execute Python code. Use this to run Python scripts, perform calculations, data analysis, or generate files.",
-		func(ctx context.Context, input PythonCodeInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(ctx context.Context, input PythonCodeInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 			if input.Code == "" {
-				return fantasy.NewTextErrorResponse("code is required"), nil
+				return unillm.NewTextErrorResponse("code is required"), nil
 			}
 
 			log.Printf("🐍 Executing Python code (%d chars, %d packages)", len(input.Code), len(input.Packages))
 
 			response, err := service.ExecutePython(input.Code, input.Packages)
 			if err != nil {
-				return fantasy.NewTextErrorResponse(err.Error()), nil
+				return unillm.NewTextErrorResponse(err.Error()), nil
 			}
 
 			resultJSON, _ := json.Marshal(response)
 			log.Printf("✅ Python execution complete (result: %v, outputs: %d, files: %d)",
 				response.Result != "", len(response.Output), len(response.Files))
 
-			return fantasy.NewTextResponse(string(resultJSON)), nil
+			return unillm.NewTextResponse(string(resultJSON)), nil
 		},
 	)
 

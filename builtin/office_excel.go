@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/kawai-network/veridium/pkg/fantasy"
+	"github.com/getkawai/unillm"
 	"github.com/getkawai/tools"
 	"github.com/kawai-network/veridium/pkg/gooxml/spreadsheet"
 )
@@ -39,7 +39,7 @@ type ReadExcelInput struct {
 // -- Executors --
 
 // CreateExcel creates a new Excel spreadsheet.
-func CreateExcel(ctx context.Context, input CreateExcelInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+func CreateExcel(ctx context.Context, input CreateExcelInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 	wb := spreadsheet.New()
 	sheet := wb.AddSheet()
 	for _, item := range input.Rows {
@@ -50,16 +50,16 @@ func CreateExcel(ctx context.Context, input CreateExcelInput, call fantasy.ToolC
 		}
 	}
 	if err := wb.SaveToFile(input.Filename); err != nil {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to save xlsx: %v", err)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to save xlsx: %v", err)), nil
 	}
-	return fantasy.NewTextResponse(fmt.Sprintf("Excel spreadsheet created successfully at %s", input.Filename)), nil
+	return unillm.NewTextResponse(fmt.Sprintf("Excel spreadsheet created successfully at %s", input.Filename)), nil
 }
 
 // UpdateExcel updates an existing Excel spreadsheet.
-func UpdateExcel(ctx context.Context, input UpdateExcelInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+func UpdateExcel(ctx context.Context, input UpdateExcelInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 	wb, err := spreadsheet.Open(input.Filename)
 	if err != nil {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to open xlsx: %v", err)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to open xlsx: %v", err)), nil
 	}
 
 	var sheet spreadsheet.Sheet
@@ -101,31 +101,31 @@ func UpdateExcel(ctx context.Context, input UpdateExcelInput, call fantasy.ToolC
 	}
 
 	if err := wb.SaveToFile(input.Filename); err != nil {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to save updated xlsx: %v", err)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to save updated xlsx: %v", err)), nil
 	}
-	return fantasy.NewTextResponse(fmt.Sprintf("Excel spreadsheet updated successfully at %s", input.Filename)), nil
+	return unillm.NewTextResponse(fmt.Sprintf("Excel spreadsheet updated successfully at %s", input.Filename)), nil
 }
 
 // ReadExcel reads an Excel spreadsheet.
-func ReadExcel(ctx context.Context, input ReadExcelInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+func ReadExcel(ctx context.Context, input ReadExcelInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 	wb, err := spreadsheet.Open(input.Filename)
 	if err != nil {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to open xlsx: %v", err)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to open xlsx: %v", err)), nil
 	}
 
 	markdown, err := wb.ToMarkdownWithImageURLs("")
 	if err != nil {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to convert to markdown: %v", err)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to convert to markdown: %v", err)), nil
 	}
 
-	return fantasy.NewTextResponse(markdown), nil
+	return unillm.NewTextResponse(markdown), nil
 }
 
 // -- Registration --
 
 // RegisterOfficeExcel registers the Excel tools.
 func RegisterOfficeExcel(registry *tools.ToolRegistry) error {
-	createTool := fantasy.NewAgentTool(
+	createTool := unillm.NewAgentTool(
 		"office-excel__create",
 		"Create a standard Spreadsheet (.xlsx).",
 		CreateExcel,
@@ -134,7 +134,7 @@ func RegisterOfficeExcel(registry *tools.ToolRegistry) error {
 		return err
 	}
 
-	updateTool := fantasy.NewAgentTool(
+	updateTool := unillm.NewAgentTool(
 		"office-excel__update",
 		"Update an existing Spreadsheet by appending rows.",
 		UpdateExcel,
@@ -143,7 +143,7 @@ func RegisterOfficeExcel(registry *tools.ToolRegistry) error {
 		return err
 	}
 
-	readTool := fantasy.NewAgentTool(
+	readTool := unillm.NewAgentTool(
 		"office-excel__read",
 		"Read data from a Spreadsheet.",
 		ReadExcel,

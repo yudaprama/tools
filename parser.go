@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/kawai-network/veridium/pkg/fantasy"
+	"github.com/getkawai/unillm"
 )
 
 // argsToJSON converts map[string]string to JSON string
@@ -27,8 +27,8 @@ func argsToJSON(args map[string]string) string {
 // 2. <tool_name>JSON</tool_name> or <tool_name attr="value">content</tool_name>
 // 3. <tool_name {JSON}> or <tool_name {"key": "value"}> (no closing tag)
 // 4. {"name": "tool_name", "parameters": {...}} (pure JSON format)
-func ParseToolCalls(response string) []fantasy.ToolCall {
-	var calls []fantasy.ToolCall
+func ParseToolCalls(response string) []unillm.ToolCall {
+	var calls []unillm.ToolCall
 
 	// Try format 1: <tool_call>{"name": "...", "arguments": {...}}</tool_call>
 	calls = parseToolCallFormat(response)
@@ -54,8 +54,8 @@ func ParseToolCalls(response string) []fantasy.ToolCall {
 }
 
 // parsePureJSONToolFormat parses pure JSON tool call format
-func parsePureJSONToolFormat(response string) []fantasy.ToolCall {
-	var calls []fantasy.ToolCall
+func parsePureJSONToolFormat(response string) []unillm.ToolCall {
+	var calls []unillm.ToolCall
 	toolNames := []string{"calculator", "web_search", "web-search", "search"}
 	remaining := strings.TrimSpace(response)
 
@@ -112,7 +112,7 @@ func parsePureJSONToolFormat(response string) []fantasy.ToolCall {
 					}
 
 					if len(args) > 0 {
-						calls = append(calls, fantasy.ToolCall{
+						calls = append(calls, unillm.ToolCall{
 							ID:    uuid.New().String(),
 							Name:  toolCall.Name,
 							Input: argsToJSON(args),
@@ -127,8 +127,8 @@ func parsePureJSONToolFormat(response string) []fantasy.ToolCall {
 }
 
 // parseInlineJSONToolFormat parses <tool_name {JSON}> format (no closing tag)
-func parseInlineJSONToolFormat(response string) []fantasy.ToolCall {
-	var calls []fantasy.ToolCall
+func parseInlineJSONToolFormat(response string) []unillm.ToolCall {
+	var calls []unillm.ToolCall
 	toolNames := []string{"calculator", "web_search", "web-search", "search"}
 
 	for _, toolName := range toolNames {
@@ -188,7 +188,7 @@ func parseInlineJSONToolFormat(response string) []fantasy.ToolCall {
 			}
 
 			if len(args) > 0 {
-				calls = append(calls, fantasy.ToolCall{
+				calls = append(calls, unillm.ToolCall{
 					ID:    uuid.New().String(),
 					Name:  toolName,
 					Input: argsToJSON(args),
@@ -207,8 +207,8 @@ func parseInlineJSONToolFormat(response string) []fantasy.ToolCall {
 // - Multiple tool calls in one response
 // - Nested JSON objects like {"a": {"b": 1}}
 // - Edge cases where </tool_call> appears inside JSON strings
-func parseToolCallFormat(response string) []fantasy.ToolCall {
-	var calls []fantasy.ToolCall
+func parseToolCallFormat(response string) []unillm.ToolCall {
+	var calls []unillm.ToolCall
 
 	// Use the robust extraction that handles nested JSON and edge cases
 	blocks := ExtractToolCallBlocks(response)
@@ -242,7 +242,7 @@ func parseToolCallFormat(response string) []fantasy.ToolCall {
 				}
 			}
 
-			calls = append(calls, fantasy.ToolCall{
+			calls = append(calls, unillm.ToolCall{
 				ID:    uuid.New().String(),
 				Name:  parsed.Name,
 				Input: argsToJSON(args),
@@ -254,8 +254,8 @@ func parseToolCallFormat(response string) []fantasy.ToolCall {
 }
 
 // parseXMLToolFormat parses <tool_name>...</tool_name> tags
-func parseXMLToolFormat(response string) []fantasy.ToolCall {
-	var calls []fantasy.ToolCall
+func parseXMLToolFormat(response string) []unillm.ToolCall {
+	var calls []unillm.ToolCall
 	toolNames := []string{"calculator", "web_search", "web-search", "search"}
 
 	for _, toolName := range toolNames {
@@ -290,7 +290,7 @@ func parseXMLToolFormat(response string) []fantasy.ToolCall {
 			}
 
 			if err := json.Unmarshal([]byte(content), &parsed); err == nil {
-				calls = append(calls, fantasy.ToolCall{
+				calls = append(calls, unillm.ToolCall{
 					ID:    uuid.New().String(),
 					Name:  parsed.Name,
 					Input: argsToJSON(parsed.Arguments),
@@ -316,7 +316,7 @@ func parseXMLToolFormat(response string) []fantasy.ToolCall {
 				}
 
 				if len(args) > 0 {
-					calls = append(calls, fantasy.ToolCall{
+					calls = append(calls, unillm.ToolCall{
 						ID:    uuid.New().String(),
 						Name:  toolName,
 						Input: argsToJSON(args),

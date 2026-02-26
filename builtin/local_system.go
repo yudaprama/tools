@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/kawai-network/veridium/pkg/fantasy"
+	"github.com/getkawai/unillm"
 	"github.com/getkawai/tools"
 	"github.com/kawai-network/veridium/pkg/localfs"
 )
 
 // ============================================================================
-// Input Types for fantasy.NewAgentTool
+// Input Types for unillm.NewAgentTool
 // ============================================================================
 
 // ListFilesInput defines input for list files tool
@@ -389,19 +389,19 @@ func RegisterLocalSystem(registry *tools.ToolRegistry) error {
 	service := NewLocalSystemService()
 
 	// Tool 1: listLocalFiles (read-only, parallel safe)
-	listTool := fantasy.NewParallelAgentTool("lobe-local-system__listLocalFiles",
+	listTool := unillm.NewParallelAgentTool("lobe-local-system__listLocalFiles",
 		"List files and folders in a specified directory. Returns a JSON array of file/folder information.",
-		func(ctx context.Context, input ListFilesInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(ctx context.Context, input ListFilesInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 			if input.Path == "" {
-				return fantasy.NewTextErrorResponse("path is required"), nil
+				return unillm.NewTextErrorResponse("path is required"), nil
 			}
 			result, err := service.ListLocalFiles(input.Path)
 			if err != nil {
-				return fantasy.NewTextErrorResponse(err.Error()), nil
+				return unillm.NewTextErrorResponse(err.Error()), nil
 			}
 			resultJSON, _ := json.Marshal(result)
 			log.Printf("📁 Listed %d items in: %s", len(result.ListResults), input.Path)
-			return fantasy.NewTextResponse(string(resultJSON)), nil
+			return unillm.NewTextResponse(string(resultJSON)), nil
 		},
 	)
 	if err := registry.Register(listTool); err != nil {
@@ -409,11 +409,11 @@ func RegisterLocalSystem(registry *tools.ToolRegistry) error {
 	}
 
 	// Tool 2: readLocalFile (read-only, parallel safe)
-	readTool := fantasy.NewParallelAgentTool("lobe-local-system__readLocalFile",
+	readTool := unillm.NewParallelAgentTool("lobe-local-system__readLocalFile",
 		"Read the content of a specific file. Returns the file content with metadata.",
-		func(ctx context.Context, input ReadFileInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(ctx context.Context, input ReadFileInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 			if input.Path == "" {
-				return fantasy.NewTextErrorResponse("path is required"), nil
+				return unillm.NewTextErrorResponse("path is required"), nil
 			}
 			loc := [2]int{0, 200}
 			if len(input.Loc) >= 2 {
@@ -421,11 +421,11 @@ func RegisterLocalSystem(registry *tools.ToolRegistry) error {
 			}
 			result, err := service.ReadLocalFile(input.Path, loc)
 			if err != nil {
-				return fantasy.NewTextErrorResponse(err.Error()), nil
+				return unillm.NewTextErrorResponse(err.Error()), nil
 			}
 			resultJSON, _ := json.Marshal(result)
 			log.Printf("📄 Read file: %s (lines %d-%d)", input.Path, loc[0], loc[1])
-			return fantasy.NewTextResponse(string(resultJSON)), nil
+			return unillm.NewTextResponse(string(resultJSON)), nil
 		},
 	)
 	if err := registry.Register(readTool); err != nil {
@@ -433,19 +433,19 @@ func RegisterLocalSystem(registry *tools.ToolRegistry) error {
 	}
 
 	// Tool 3: searchLocalFiles (read-only, parallel safe)
-	searchTool := fantasy.NewParallelAgentTool("lobe-local-system__searchLocalFiles",
+	searchTool := unillm.NewParallelAgentTool("lobe-local-system__searchLocalFiles",
 		"Search for files within a directory based on keywords. Returns matching files.",
-		func(ctx context.Context, input SearchFilesInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(ctx context.Context, input SearchFilesInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 			if input.Keywords == "" {
-				return fantasy.NewTextErrorResponse("keywords is required"), nil
+				return unillm.NewTextErrorResponse("keywords is required"), nil
 			}
 			result, err := service.SearchLocalFiles(input.Keywords, input.Directory)
 			if err != nil {
-				return fantasy.NewTextErrorResponse(err.Error()), nil
+				return unillm.NewTextErrorResponse(err.Error()), nil
 			}
 			resultJSON, _ := json.Marshal(result)
 			log.Printf("🔍 Found %d files matching: %s", len(result.SearchResults), input.Keywords)
-			return fantasy.NewTextResponse(string(resultJSON)), nil
+			return unillm.NewTextResponse(string(resultJSON)), nil
 		},
 	)
 	if err := registry.Register(searchTool); err != nil {
@@ -453,19 +453,19 @@ func RegisterLocalSystem(registry *tools.ToolRegistry) error {
 	}
 
 	// Tool 4: writeLocalFile (modifies filesystem, NOT parallel safe)
-	writeTool := fantasy.NewAgentTool("lobe-local-system__writeLocalFile",
+	writeTool := unillm.NewAgentTool("lobe-local-system__writeLocalFile",
 		"Write content to a specific file. Creates the file if it doesn't exist.",
-		func(ctx context.Context, input WriteFileInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(ctx context.Context, input WriteFileInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 			if input.Path == "" {
-				return fantasy.NewTextErrorResponse("path is required"), nil
+				return unillm.NewTextErrorResponse("path is required"), nil
 			}
 			result, err := service.WriteLocalFile(input.Path, input.Content)
 			if err != nil {
-				return fantasy.NewTextErrorResponse(err.Error()), nil
+				return unillm.NewTextErrorResponse(err.Error()), nil
 			}
 			resultJSON, _ := json.Marshal(result)
 			log.Printf("✏️  Wrote file: %s", input.Path)
-			return fantasy.NewTextResponse(string(resultJSON)), nil
+			return unillm.NewTextResponse(string(resultJSON)), nil
 		},
 	)
 	if err := registry.Register(writeTool); err != nil {
@@ -473,19 +473,19 @@ func RegisterLocalSystem(registry *tools.ToolRegistry) error {
 	}
 
 	// Tool 5: renameLocalFile (modifies filesystem, NOT parallel safe)
-	renameTool := fantasy.NewAgentTool("lobe-local-system__renameLocalFile",
+	renameTool := unillm.NewAgentTool("lobe-local-system__renameLocalFile",
 		"Rename a file or folder in its current location.",
-		func(ctx context.Context, input RenameFileInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(ctx context.Context, input RenameFileInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 			if input.Path == "" || input.NewName == "" {
-				return fantasy.NewTextErrorResponse("path and newName are required"), nil
+				return unillm.NewTextErrorResponse("path and newName are required"), nil
 			}
 			result, err := service.RenameLocalFile(input.Path, input.NewName)
 			if err != nil {
-				return fantasy.NewTextErrorResponse(err.Error()), nil
+				return unillm.NewTextErrorResponse(err.Error()), nil
 			}
 			resultJSON, _ := json.Marshal(result)
 			log.Printf("📝 Renamed: %s -> %s", input.Path, result.NewPath)
-			return fantasy.NewTextResponse(string(resultJSON)), nil
+			return unillm.NewTextResponse(string(resultJSON)), nil
 		},
 	)
 	if err := registry.Register(renameTool); err != nil {
@@ -493,19 +493,19 @@ func RegisterLocalSystem(registry *tools.ToolRegistry) error {
 	}
 
 	// Tool 6: moveLocalFiles (modifies filesystem, NOT parallel safe)
-	moveTool := fantasy.NewAgentTool("lobe-local-system__moveLocalFiles",
+	moveTool := unillm.NewAgentTool("lobe-local-system__moveLocalFiles",
 		"Move or rename multiple files/directories.",
-		func(ctx context.Context, input MoveFilesInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(ctx context.Context, input MoveFilesInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 			if len(input.Items) == 0 {
-				return fantasy.NewTextErrorResponse("items is required"), nil
+				return unillm.NewTextErrorResponse("items is required"), nil
 			}
 			result, err := service.MoveLocalFiles(input.Items)
 			if err != nil {
-				return fantasy.NewTextErrorResponse(err.Error()), nil
+				return unillm.NewTextErrorResponse(err.Error()), nil
 			}
 			resultJSON, _ := json.Marshal(result)
 			log.Printf("📦 Moved %d/%d files", result.SuccessCount, result.TotalCount)
-			return fantasy.NewTextResponse(string(resultJSON)), nil
+			return unillm.NewTextResponse(string(resultJSON)), nil
 		},
 	)
 	if err := registry.Register(moveTool); err != nil {

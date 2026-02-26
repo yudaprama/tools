@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/kawai-network/veridium/pkg/fantasy"
+	"github.com/getkawai/unillm"
 )
 
 // ToolExecutor is a function that executes a tool with string arguments
 type ToolExecutor func(ctx context.Context, args map[string]string) (string, error)
 
-// SimpleTool is a simple implementation of fantasy.AgentTool
+// SimpleTool is a simple implementation of unillm.AgentTool
 type SimpleTool struct {
 	name            string
 	description     string
@@ -19,7 +19,7 @@ type SimpleTool struct {
 	required        []string
 	parallel        bool
 	executor        ToolExecutor
-	providerOptions fantasy.ProviderOptions
+	providerOptions unillm.ProviderOptions
 }
 
 // SimpleToolConfig configures a SimpleTool
@@ -45,8 +45,8 @@ func NewSimpleTool(cfg SimpleToolConfig) *SimpleTool {
 }
 
 // Info returns tool metadata
-func (t *SimpleTool) Info() fantasy.ToolInfo {
-	return fantasy.ToolInfo{
+func (t *SimpleTool) Info() unillm.ToolInfo {
+	return unillm.ToolInfo{
 		Name:        t.name,
 		Description: t.description,
 		Parameters:  t.parameters,
@@ -56,7 +56,7 @@ func (t *SimpleTool) Info() fantasy.ToolInfo {
 }
 
 // Run executes the tool
-func (t *SimpleTool) Run(ctx context.Context, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+func (t *SimpleTool) Run(ctx context.Context, call unillm.ToolCall) (unillm.ToolResponse, error) {
 	// Parse input JSON to map[string]string
 	args := make(map[string]string)
 	if call.Input != "" {
@@ -87,19 +87,19 @@ func (t *SimpleTool) Run(ctx context.Context, call fantasy.ToolCall) (fantasy.To
 	// Execute the tool
 	result, err := t.executor(ctx, args)
 	if err != nil {
-		return fantasy.NewTextErrorResponse(err.Error()), nil
+		return unillm.NewTextErrorResponse(err.Error()), nil
 	}
 
-	return fantasy.NewTextResponse(result), nil
+	return unillm.NewTextResponse(result), nil
 }
 
 // ProviderOptions returns provider-specific options
-func (t *SimpleTool) ProviderOptions() fantasy.ProviderOptions {
+func (t *SimpleTool) ProviderOptions() unillm.ProviderOptions {
 	return t.providerOptions
 }
 
 // SetProviderOptions sets provider-specific options
-func (t *SimpleTool) SetProviderOptions(opts fantasy.ProviderOptions) {
+func (t *SimpleTool) SetProviderOptions(opts unillm.ProviderOptions) {
 	t.providerOptions = opts
 }
 

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/kawai-network/veridium/pkg/fantasy"
+	"github.com/getkawai/unillm"
 	"github.com/getkawai/tools"
 )
 
@@ -34,7 +34,7 @@ type MemorySearcher interface {
 
 // RegisterMemorySearch registers the memory search tool
 func RegisterMemorySearch(registry *tools.ToolRegistry, searcher MemorySearcher) error {
-	tool := fantasy.NewParallelAgentTool("search_memory",
+	tool := unillm.NewParallelAgentTool("search_memory",
 		`Search past conversations and stored memories about the user. 
 Use this tool when you need to:
 - Recall previous discussions or decisions
@@ -43,9 +43,9 @@ Use this tool when you need to:
 - Look up tasks or projects mentioned before
 
 The search uses semantic similarity, so you can describe what you're looking for in natural language.`,
-		func(ctx context.Context, input MemorySearchInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(ctx context.Context, input MemorySearchInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 			if input.Query == "" {
-				return fantasy.NewTextErrorResponse("query parameter is required"), nil
+				return unillm.NewTextErrorResponse("query parameter is required"), nil
 			}
 
 			limit := input.Limit
@@ -64,11 +64,11 @@ The search uses semantic similarity, so you can describe what you're looking for
 
 			if err != nil {
 				log.Printf("⚠️  Memory search failed: %v", err)
-				return fantasy.NewTextErrorResponse(fmt.Sprintf("memory search failed: %v", err)), nil
+				return unillm.NewTextErrorResponse(fmt.Sprintf("memory search failed: %v", err)), nil
 			}
 
 			if len(results) == 0 {
-				return fantasy.NewTextResponse("No relevant memories found for your query."), nil
+				return unillm.NewTextResponse("No relevant memories found for your query."), nil
 			}
 
 			// Format results for LLM
@@ -83,10 +83,10 @@ The search uses semantic similarity, so you can describe what you're looking for
 
 			resultJSON, err := json.Marshal(resultData)
 			if err != nil {
-				return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to marshal results: %v", err)), nil
+				return unillm.NewTextErrorResponse(fmt.Sprintf("failed to marshal results: %v", err)), nil
 			}
 
-			return fantasy.NewTextResponse(string(resultJSON)), nil
+			return unillm.NewTextResponse(string(resultJSON)), nil
 		},
 	)
 

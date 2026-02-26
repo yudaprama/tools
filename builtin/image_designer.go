@@ -14,7 +14,7 @@ import (
 	"github.com/getkawai/tools"
 	"github.com/getkawai/tools/image"
 	"github.com/google/uuid"
-	"github.com/kawai-network/veridium/pkg/fantasy"
+	"github.com/getkawai/unillm"
 )
 
 // Text2ImageInput defines input for text2image tool
@@ -283,11 +283,11 @@ func truncateString(s string, maxLen int) string {
 func RegisterImageDesigner(registry *tools.ToolRegistry) error {
 	service := NewImageDesignerService()
 
-	tool := fantasy.NewAgentTool("lobe-image-designer__text2image",
+	tool := unillm.NewAgentTool("lobe-image-designer__text2image",
 		"Create images from text prompts using AI image generation. Generate up to 4 diverse images based on the description.",
-		func(ctx context.Context, input Text2ImageInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(ctx context.Context, input Text2ImageInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 			if len(input.Prompts) == 0 {
-				return fantasy.NewTextErrorResponse("at least one prompt is required"), nil
+				return unillm.NewTextErrorResponse("at least one prompt is required"), nil
 			}
 
 			prompts := input.Prompts
@@ -297,12 +297,12 @@ func RegisterImageDesigner(registry *tools.ToolRegistry) error {
 
 			results, err := service.Text2Image(prompts, input.Quality, input.Size, input.Style, input.Seeds)
 			if err != nil {
-				return fantasy.NewTextErrorResponse(err.Error()), nil
+				return unillm.NewTextErrorResponse(err.Error()), nil
 			}
 
 			resultJSON, _ := json.Marshal(results)
 			log.Printf("🖼️  Generated %d images", len(results))
-			return fantasy.NewTextResponse(string(resultJSON)), nil
+			return unillm.NewTextResponse(string(resultJSON)), nil
 		},
 	)
 

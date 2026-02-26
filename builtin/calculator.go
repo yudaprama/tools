@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/Knetic/govaluate"
-	"github.com/kawai-network/veridium/pkg/fantasy"
+	"github.com/getkawai/unillm"
 	"github.com/getkawai/tools"
 )
 
@@ -16,26 +16,26 @@ type CalculatorInput struct {
 
 // RegisterCalculator registers the calculator tool
 func RegisterCalculator(registry *tools.ToolRegistry) error {
-	tool := fantasy.NewParallelAgentTool("calculator",
+	tool := unillm.NewParallelAgentTool("calculator",
 		"Perform mathematical calculations. Supports: +, -, *, /, sqrt(), sin(), cos(), tan(), pow(), pi, e",
-		func(ctx context.Context, input CalculatorInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(ctx context.Context, input CalculatorInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 			if input.Expression == "" {
-				return fantasy.NewTextErrorResponse("expression parameter is required"), nil
+				return unillm.NewTextErrorResponse("expression parameter is required"), nil
 			}
 
 			// Create evaluator with math functions
 			expr, err := govaluate.NewEvaluableExpression(input.Expression)
 			if err != nil {
-				return fantasy.NewTextErrorResponse(fmt.Sprintf("invalid expression: %v", err)), nil
+				return unillm.NewTextErrorResponse(fmt.Sprintf("invalid expression: %v", err)), nil
 			}
 
 			// Evaluate expression
 			result, err := expr.Evaluate(nil)
 			if err != nil {
-				return fantasy.NewTextErrorResponse(fmt.Sprintf("evaluation failed: %v", err)), nil
+				return unillm.NewTextErrorResponse(fmt.Sprintf("evaluation failed: %v", err)), nil
 			}
 
-			return fantasy.NewTextResponse(fmt.Sprintf("%v", result)), nil
+			return unillm.NewTextResponse(fmt.Sprintf("%v", result)), nil
 		},
 	)
 

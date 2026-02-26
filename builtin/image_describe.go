@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kawai-network/veridium/pkg/fantasy"
+	"github.com/getkawai/unillm"
 	"github.com/getkawai/tools"
 	db "github.com/kawai-network/veridium/internal/database/generated"
 )
@@ -85,18 +85,18 @@ func (s *ImageDescribeService) GetImageDescription(ctx context.Context, fileID s
 func RegisterImageDescribe(registry *tools.ToolRegistry, sqlDB *sql.DB) error {
 	service := NewImageDescribeService(sqlDB)
 
-	tool := fantasy.NewParallelAgentTool("lobe-image-describe__getImageDescription",
+	tool := unillm.NewParallelAgentTool("lobe-image-describe__getImageDescription",
 		"Get AI-generated description of an uploaded image or video. Use this when user asks about image content, text extraction, OCR, or visual analysis. The description is pre-generated when the file was uploaded.",
-		func(ctx context.Context, input ImageDescribeInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(ctx context.Context, input ImageDescribeInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 			if input.FileID == "" {
-				return fantasy.NewTextErrorResponse("file_id parameter is required"), nil
+				return unillm.NewTextErrorResponse("file_id parameter is required"), nil
 			}
 
 			// Wait up to 2 minutes for VL description
 			description, err := service.GetImageDescription(ctx, input.FileID, 2*time.Minute)
 			if err != nil {
 				log.Printf("⚠️  [ImageDescribe] Failed to get description: %v", err)
-				return fantasy.NewTextErrorResponse(err.Error()), nil
+				return unillm.NewTextErrorResponse(err.Error()), nil
 			}
 
 			result := map[string]interface{}{
@@ -107,10 +107,10 @@ func RegisterImageDescribe(registry *tools.ToolRegistry, sqlDB *sql.DB) error {
 
 			resultJSON, err := json.Marshal(result)
 			if err != nil {
-				return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to marshal result: %v", err)), nil
+				return unillm.NewTextErrorResponse(fmt.Sprintf("failed to marshal result: %v", err)), nil
 			}
 
-			return fantasy.NewTextResponse(string(resultJSON)), nil
+			return unillm.NewTextResponse(string(resultJSON)), nil
 		},
 	)
 

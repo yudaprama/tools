@@ -5,25 +5,25 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/kawai-network/veridium/pkg/fantasy"
+	"github.com/getkawai/unillm"
 )
 
-// ToolRegistry manages fantasy.AgentTool instances
+// ToolRegistry manages unillm.AgentTool instances
 type ToolRegistry struct {
-	tools   map[string]fantasy.AgentTool
+	tools   map[string]unillm.AgentTool
 	enabled map[string]bool
 }
 
 // NewToolRegistry creates a new tool registry
 func NewToolRegistry() *ToolRegistry {
 	return &ToolRegistry{
-		tools:   make(map[string]fantasy.AgentTool),
+		tools:   make(map[string]unillm.AgentTool),
 		enabled: make(map[string]bool),
 	}
 }
 
 // Register registers a tool
-func (r *ToolRegistry) Register(tool fantasy.AgentTool) error {
+func (r *ToolRegistry) Register(tool unillm.AgentTool) error {
 	info := tool.Info()
 	if info.Name == "" {
 		return fmt.Errorf("tool name is required")
@@ -35,14 +35,14 @@ func (r *ToolRegistry) Register(tool fantasy.AgentTool) error {
 }
 
 // Get retrieves a tool by name
-func (r *ToolRegistry) Get(name string) (fantasy.AgentTool, bool) {
+func (r *ToolRegistry) Get(name string) (unillm.AgentTool, bool) {
 	tool, ok := r.tools[name]
 	return tool, ok
 }
 
 // GetAll returns all tools
-func (r *ToolRegistry) GetAll() []fantasy.AgentTool {
-	tools := make([]fantasy.AgentTool, 0, len(r.tools))
+func (r *ToolRegistry) GetAll() []unillm.AgentTool {
+	tools := make([]unillm.AgentTool, 0, len(r.tools))
 	for _, t := range r.tools {
 		tools = append(tools, t)
 	}
@@ -50,8 +50,8 @@ func (r *ToolRegistry) GetAll() []fantasy.AgentTool {
 }
 
 // GetEnabled returns all enabled tools
-func (r *ToolRegistry) GetEnabled() []fantasy.AgentTool {
-	tools := make([]fantasy.AgentTool, 0, len(r.tools))
+func (r *ToolRegistry) GetEnabled() []unillm.AgentTool {
+	tools := make([]unillm.AgentTool, 0, len(r.tools))
 	for name, t := range r.tools {
 		if r.enabled[name] {
 			tools = append(tools, t)
@@ -61,12 +61,12 @@ func (r *ToolRegistry) GetEnabled() []fantasy.AgentTool {
 }
 
 // GetByNames returns tools by names (or all enabled if empty)
-func (r *ToolRegistry) GetByNames(names []string) []fantasy.AgentTool {
+func (r *ToolRegistry) GetByNames(names []string) []unillm.AgentTool {
 	if len(names) == 0 {
 		return r.GetEnabled()
 	}
 
-	tools := make([]fantasy.AgentTool, 0, len(names))
+	tools := make([]unillm.AgentTool, 0, len(names))
 	for _, name := range names {
 		if tool, ok := r.tools[name]; ok && r.enabled[name] {
 			tools = append(tools, tool)
@@ -75,8 +75,8 @@ func (r *ToolRegistry) GetByNames(names []string) []fantasy.AgentTool {
 	return tools
 }
 
-// ToAgentTools returns tools as []fantasy.AgentTool (same as GetByNames)
-func (r *ToolRegistry) ToAgentTools(names []string) []fantasy.AgentTool {
+// ToAgentTools returns tools as []unillm.AgentTool (same as GetByNames)
+func (r *ToolRegistry) ToAgentTools(names []string) []unillm.AgentTool {
 	return r.GetByNames(names)
 }
 
@@ -93,7 +93,7 @@ func (r *ToolRegistry) Execute(ctx context.Context, name string, args map[string
 
 	// Convert args to JSON for ToolCall
 	argsJSON, _ := json.Marshal(args)
-	call := fantasy.ToolCall{
+	call := unillm.ToolCall{
 		ID:    name,
 		Name:  name,
 		Input: string(argsJSON),

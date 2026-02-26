@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/kawai-network/veridium/pkg/fantasy"
+	"github.com/getkawai/unillm"
 	"github.com/getkawai/tools"
 	"github.com/getkawai/tools/search"
 )
@@ -21,11 +21,11 @@ type WebSearchInput struct {
 func RegisterWebSearch(registry *tools.ToolRegistry) error {
 	searchService := search.NewService()
 
-	tool := fantasy.NewParallelAgentTool("web_search",
+	tool := unillm.NewParallelAgentTool("web_search",
 		"Search the web for current information using Brave Search. Returns real-time search results with titles, URLs, and descriptions.",
-		func(ctx context.Context, input WebSearchInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(ctx context.Context, input WebSearchInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 			if input.Query == "" {
-				return fantasy.NewTextErrorResponse("query parameter is required"), nil
+				return unillm.NewTextErrorResponse("query parameter is required"), nil
 			}
 
 			maxResults := input.MaxResults
@@ -44,7 +44,7 @@ func RegisterWebSearch(registry *tools.ToolRegistry) error {
 			response, err := searchService.WebSearch(searchQuery)
 			if err != nil {
 				log.Printf("⚠️  Web search failed: %v", err)
-				return fantasy.NewTextErrorResponse(fmt.Sprintf("search failed: %v", err)), nil
+				return unillm.NewTextErrorResponse(fmt.Sprintf("search failed: %v", err)), nil
 			}
 
 			// Format results for LLM
@@ -69,10 +69,10 @@ func RegisterWebSearch(registry *tools.ToolRegistry) error {
 
 			resultJSON, err := json.Marshal(resultData)
 			if err != nil {
-				return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to marshal results: %v", err)), nil
+				return unillm.NewTextErrorResponse(fmt.Sprintf("failed to marshal results: %v", err)), nil
 			}
 
-			return fantasy.NewTextResponse(string(resultJSON)), nil
+			return unillm.NewTextResponse(string(resultJSON)), nil
 		},
 	)
 

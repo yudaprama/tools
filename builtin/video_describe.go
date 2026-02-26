@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kawai-network/veridium/pkg/fantasy"
+	"github.com/getkawai/unillm"
 	"github.com/getkawai/tools"
 	db "github.com/kawai-network/veridium/internal/database/generated"
 )
@@ -79,18 +79,18 @@ func (s *VideoDescribeService) GetVideoTranscription(ctx context.Context, fileID
 func RegisterVideoDescribe(registry *tools.ToolRegistry, sqlDB *sql.DB) error {
 	service := NewVideoDescribeService(sqlDB)
 
-	tool := fantasy.NewParallelAgentTool("lobe-video-describe__getVideoTranscription",
+	tool := unillm.NewParallelAgentTool("lobe-video-describe__getVideoTranscription",
 		"Get AI-generated transcription of an uploaded video's audio. Use this when user asks about what is said in the video, video content, spoken words, dialogue, or audio transcription. The transcription is generated using Whisper STT when the video was uploaded.",
-		func(ctx context.Context, input VideoDescribeInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(ctx context.Context, input VideoDescribeInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 			if input.FileID == "" {
-				return fantasy.NewTextErrorResponse("file_id parameter is required"), nil
+				return unillm.NewTextErrorResponse("file_id parameter is required"), nil
 			}
 
 			// Wait up to 3 minutes for transcription (video processing takes longer)
 			transcription, err := service.GetVideoTranscription(ctx, input.FileID, 3*time.Minute)
 			if err != nil {
 				log.Printf("⚠️  [VideoDescribe] Failed to get transcription: %v", err)
-				return fantasy.NewTextErrorResponse(err.Error()), nil
+				return unillm.NewTextErrorResponse(err.Error()), nil
 			}
 
 			result := map[string]interface{}{
@@ -101,10 +101,10 @@ func RegisterVideoDescribe(registry *tools.ToolRegistry, sqlDB *sql.DB) error {
 
 			resultJSON, err := json.Marshal(result)
 			if err != nil {
-				return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to marshal result: %v", err)), nil
+				return unillm.NewTextErrorResponse(fmt.Sprintf("failed to marshal result: %v", err)), nil
 			}
 
-			return fantasy.NewTextResponse(string(resultJSON)), nil
+			return unillm.NewTextResponse(string(resultJSON)), nil
 		},
 	)
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/kawai-network/veridium/pkg/fantasy"
+	"github.com/getkawai/unillm"
 	"github.com/getkawai/tools"
 	"github.com/kawai-network/veridium/pkg/gooxml/color"
 	"github.com/kawai-network/veridium/pkg/gooxml/document"
@@ -172,51 +172,51 @@ func appendWordElements(doc *document.Document, elements []WordElement) {
 // -- Executors --
 
 // CreateWord creates a new Word document.
-func CreateWord(ctx context.Context, input CreateWordInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+func CreateWord(ctx context.Context, input CreateWordInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 	doc := document.New()
 	appendWordElements(doc, input.Elements)
 
 	if err := doc.SaveToFile(input.Filename); err != nil {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to save docx: %v", err)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to save docx: %v", err)), nil
 	}
-	return fantasy.NewTextResponse(fmt.Sprintf("Word document created successfully at %s", input.Filename)), nil
+	return unillm.NewTextResponse(fmt.Sprintf("Word document created successfully at %s", input.Filename)), nil
 }
 
 // UpdateWord updates an existing Word document.
-func UpdateWord(ctx context.Context, input UpdateWordInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+func UpdateWord(ctx context.Context, input UpdateWordInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 	doc, err := document.Open(input.Filename)
 	if err != nil {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to open docx: %v", err)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to open docx: %v", err)), nil
 	}
 
 	appendWordElements(doc, input.Elements)
 
 	if err := doc.SaveToFile(input.Filename); err != nil {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to save updated docx: %v", err)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to save updated docx: %v", err)), nil
 	}
-	return fantasy.NewTextResponse(fmt.Sprintf("Word document updated successfully at %s", input.Filename)), nil
+	return unillm.NewTextResponse(fmt.Sprintf("Word document updated successfully at %s", input.Filename)), nil
 }
 
 // ReadWord reads content from a Word document.
-func ReadWord(ctx context.Context, input ReadWordInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+func ReadWord(ctx context.Context, input ReadWordInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 	doc, err := document.Open(input.Filename)
 	if err != nil {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to open docx: %v", err)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to open docx: %v", err)), nil
 	}
 
 	markdown, err := doc.ToMarkdownWithImageURLs("")
 	if err != nil {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to convert to markdown: %v", err)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to convert to markdown: %v", err)), nil
 	}
 
-	return fantasy.NewTextResponse(markdown), nil
+	return unillm.NewTextResponse(markdown), nil
 }
 
 // -- Registration --
 
 // RegisterOfficeWord registers the Word tools.
 func RegisterOfficeWord(registry *tools.ToolRegistry) error {
-	createTool := fantasy.NewAgentTool(
+	createTool := unillm.NewAgentTool(
 		"office-word__create",
 		"Create a standard Word document (.docx). Supports rich text (bold, italic, color) and tables.",
 		CreateWord,
@@ -225,7 +225,7 @@ func RegisterOfficeWord(registry *tools.ToolRegistry) error {
 		return err
 	}
 
-	updateTool := fantasy.NewAgentTool(
+	updateTool := unillm.NewAgentTool(
 		"office-word__update",
 		"Update an existing Word document by appending paragraphs or tables to the end.",
 		UpdateWord,
@@ -234,7 +234,7 @@ func RegisterOfficeWord(registry *tools.ToolRegistry) error {
 		return err
 	}
 
-	readTool := fantasy.NewAgentTool(
+	readTool := unillm.NewAgentTool(
 		"office-word__read",
 		"Read text content from a Word document, including paragraphs and tables.",
 		ReadWord,

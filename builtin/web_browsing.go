@@ -7,13 +7,13 @@ import (
 	"log"
 	"time"
 
-	"github.com/kawai-network/veridium/pkg/fantasy"
+	"github.com/getkawai/unillm"
 	"github.com/getkawai/tools"
 	"github.com/getkawai/tools/search"
 )
 
 // ============================================================================
-// Input Types for fantasy.NewAgentTool
+// Input Types for unillm.NewAgentTool
 // ============================================================================
 
 // WebSearchInput defines input for web search tool
@@ -159,11 +159,11 @@ func RegisterWebBrowsing(registry *tools.ToolRegistry) error {
 	service := NewWebBrowsingService()
 
 	// Tool 1: search
-	searchTool := fantasy.NewParallelAgentTool("lobe-web-browsing__search",
+	searchTool := unillm.NewParallelAgentTool("lobe-web-browsing__search",
 		"Search the web for information. Returns a list of search results with title, content, and URL.",
-		func(ctx context.Context, input WebBrowsingSearchInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(ctx context.Context, input WebBrowsingSearchInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 			if input.Query == "" {
-				return fantasy.NewTextErrorResponse("query is required"), nil
+				return unillm.NewTextErrorResponse("query is required"), nil
 			}
 
 			timeRange := input.SearchTimeRange
@@ -173,16 +173,16 @@ func RegisterWebBrowsing(registry *tools.ToolRegistry) error {
 
 			response, err := service.Search(input.Query, input.SearchCategories, input.SearchEngines, timeRange)
 			if err != nil {
-				return fantasy.NewTextErrorResponse(err.Error()), nil
+				return unillm.NewTextErrorResponse(err.Error()), nil
 			}
 
 			resultJSON, err := json.Marshal(response)
 			if err != nil {
-				return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to marshal response: %v", err)), nil
+				return unillm.NewTextErrorResponse(fmt.Sprintf("failed to marshal response: %v", err)), nil
 			}
 
 			log.Printf("🔍 Web search completed: query=%s, results=%d", input.Query, len(response.Results))
-			return fantasy.NewTextResponse(string(resultJSON)), nil
+			return unillm.NewTextResponse(string(resultJSON)), nil
 		},
 	)
 
@@ -191,25 +191,25 @@ func RegisterWebBrowsing(registry *tools.ToolRegistry) error {
 	}
 
 	// Tool 2: crawlSinglePage
-	crawlSingleTool := fantasy.NewParallelAgentTool("lobe-web-browsing__crawlSinglePage",
+	crawlSingleTool := unillm.NewParallelAgentTool("lobe-web-browsing__crawlSinglePage",
 		"Retrieve content from a specific webpage. Returns the page title, content, URL and website.",
-		func(ctx context.Context, input CrawlSingleInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(ctx context.Context, input CrawlSingleInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 			if input.URL == "" {
-				return fantasy.NewTextErrorResponse("url is required"), nil
+				return unillm.NewTextErrorResponse("url is required"), nil
 			}
 
 			response, err := service.CrawlSinglePage(input.URL)
 			if err != nil {
-				return fantasy.NewTextErrorResponse(err.Error()), nil
+				return unillm.NewTextErrorResponse(err.Error()), nil
 			}
 
 			resultJSON, err := json.Marshal(response)
 			if err != nil {
-				return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to marshal response: %v", err)), nil
+				return unillm.NewTextErrorResponse(fmt.Sprintf("failed to marshal response: %v", err)), nil
 			}
 
 			log.Printf("🌐 Crawled single page: url=%s", input.URL)
-			return fantasy.NewTextResponse(string(resultJSON)), nil
+			return unillm.NewTextResponse(string(resultJSON)), nil
 		},
 	)
 
@@ -218,25 +218,25 @@ func RegisterWebBrowsing(registry *tools.ToolRegistry) error {
 	}
 
 	// Tool 3: crawlMultiPages
-	crawlMultiTool := fantasy.NewParallelAgentTool("lobe-web-browsing__crawlMultiPages",
+	crawlMultiTool := unillm.NewParallelAgentTool("lobe-web-browsing__crawlMultiPages",
 		"Retrieve content from multiple webpages simultaneously. Returns an array of page results.",
-		func(ctx context.Context, input CrawlMultiInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(ctx context.Context, input CrawlMultiInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 			if len(input.URLs) == 0 {
-				return fantasy.NewTextErrorResponse("at least one URL is required"), nil
+				return unillm.NewTextErrorResponse("at least one URL is required"), nil
 			}
 
 			response, err := service.CrawlMultiPages(input.URLs)
 			if err != nil {
-				return fantasy.NewTextErrorResponse(err.Error()), nil
+				return unillm.NewTextErrorResponse(err.Error()), nil
 			}
 
 			resultJSON, err := json.Marshal(response)
 			if err != nil {
-				return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to marshal response: %v", err)), nil
+				return unillm.NewTextErrorResponse(fmt.Sprintf("failed to marshal response: %v", err)), nil
 			}
 
 			log.Printf("🌐 Crawled %d pages", len(input.URLs))
-			return fantasy.NewTextResponse(string(resultJSON)), nil
+			return unillm.NewTextResponse(string(resultJSON)), nil
 		},
 	)
 

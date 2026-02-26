@@ -36,19 +36,19 @@ Agent service menerima request dan setup Fantasy Agent:
 // internal/services/agent_real_stream.go
 agentTools := s.toolRegistry.ToAgentTools(session.ToolNames)
 
-agent := fantasy.NewAgent(model,
-    fantasy.WithTools(agentTools...),
-    fantasy.WithSystemPrompt(systemPrompt),
-    fantasy.WithStopConditions(fantasy.StepCountIs(10)),
+agent := unillm.NewAgent(model,
+    unillm.WithTools(agentTools...),
+    unillm.WithSystemPrompt(systemPrompt),
+    unillm.WithStopConditions(unillm.StepCountIs(10)),
 )
 
-result, err := agent.Stream(ctx, fantasy.AgentStreamCall{
+result, err := agent.Stream(ctx, unillm.AgentStreamCall{
     Prompt:   userPrompt,
     Messages: historyMessages,
     OnTextDelta: func(id, text string) error {
         // Stream text ke frontend
     },
-    OnToolCall: func(call fantasy.ToolCallContent) error {
+    OnToolCall: func(call unillm.ToolCallContent) error {
         // Execute tool dan stream result ke frontend
     },
 })
@@ -68,9 +68,9 @@ type PostgresAttachInput struct {
 }
 
 // Tool registration dengan auto schema generation
-attachTool := fantasy.NewAgentTool("postgres_attach",
+attachTool := unillm.NewAgentTool("postgres_attach",
     "Connect to a PostgreSQL database",
-    func(ctx context.Context, input PostgresAttachInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+    func(ctx context.Context, input PostgresAttachInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
         return service.attach(ctx, input)
     },
 )
@@ -140,7 +140,7 @@ Fantasy Agent execute tool dengan arguments dari LLM:
 
 ```go
 // LLM generates tool call dengan arguments
-toolCall := fantasy.ToolCallContent{
+toolCall := unillm.ToolCallContent{
     ToolName: "postgres_attach",
     Input: `{
         "name": "prod_db",
@@ -494,8 +494,8 @@ Backend hanya load tools yang enabled:
 agentTools := s.toolRegistry.ToAgentTools(session.ToolNames)
 // Only returns tools that are in session.ToolNames
 
-agent := fantasy.NewAgent(model,
-    fantasy.WithTools(agentTools...),  // Only enabled tools
+agent := unillm.NewAgent(model,
+    unillm.WithTools(agentTools...),  // Only enabled tools
     // ...
 )
 ```
@@ -506,12 +506,12 @@ Tool registry filter berdasarkan names:
 
 ```go
 // pkg/fantasy/tools/registry.go
-func (r *ToolRegistry) GetByNames(names []string) []fantasy.AgentTool {
+func (r *ToolRegistry) GetByNames(names []string) []unillm.AgentTool {
     if len(names) == 0 {
         return r.GetEnabled()  // All enabled tools
     }
     
-    tools := make([]fantasy.AgentTool, 0, len(names))
+    tools := make([]unillm.AgentTool, 0, len(names))
     for _, name := range names {
         if tool, ok := r.tools[name]; ok && r.enabled[name] {
             tools = append(tools, tool)
@@ -577,7 +577,7 @@ if input.ReadOnly != nil {
 ```go
 // Validate all identifiers
 if err := validateSQLIdent(input.Name); err != nil {
-    return fantasy.NewTextErrorResponse(err.Error()), nil
+    return unillm.NewTextErrorResponse(err.Error()), nil
 }
 ```
 
@@ -585,7 +585,7 @@ if err := validateSQLIdent(input.Name); err != nil {
 ```go
 // Require explicit confirmation for DROP/DELETE/TRUNCATE
 if isDangerous && !input.Confirm {
-    return fantasy.NewTextErrorResponse(
+    return unillm.NewTextErrorResponse(
         "dangerous operation detected. Set confirm=true to proceed."
     ), nil
 }
@@ -635,17 +635,17 @@ Tools mengembalikan user-friendly error messages:
 
 ```go
 // Invalid identifier
-return fantasy.NewTextErrorResponse(
+return unillm.NewTextErrorResponse(
     "invalid identifier 'my-db': must start with letter/underscore"
 ), nil
 
 // Connection not found
-return fantasy.NewTextErrorResponse(
+return unillm.NewTextErrorResponse(
     "connection 'prod' not found. Use postgres_attach first."
 ), nil
 
 // Query failed
-return fantasy.NewTextErrorResponse(
+return unillm.NewTextErrorResponse(
     fmt.Sprintf("query failed: %v", err)
 ), nil
 ```

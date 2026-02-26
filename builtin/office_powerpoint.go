@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/kawai-network/veridium/pkg/fantasy"
+	"github.com/getkawai/unillm"
 	"github.com/getkawai/tools"
 	"github.com/kawai-network/veridium/pkg/gooxml/measurement"
 	"github.com/kawai-network/veridium/pkg/gooxml/presentation"
@@ -72,51 +72,51 @@ func addSlidesToPres(ppt *presentation.Presentation, slides []PowerPointSlide) {
 // -- Executors --
 
 // CreatePowerPoint creates a new PowerPoint presentation.
-func CreatePowerPoint(ctx context.Context, input CreatePowerPointInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+func CreatePowerPoint(ctx context.Context, input CreatePowerPointInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 	ppt := presentation.New()
 	addSlidesToPres(ppt, input.Slides)
 
 	if err := ppt.SaveToFile(input.Filename); err != nil {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to save pptx: %v", err)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to save pptx: %v", err)), nil
 	}
-	return fantasy.NewTextResponse(fmt.Sprintf("PowerPoint presentation created successfully at %s", input.Filename)), nil
+	return unillm.NewTextResponse(fmt.Sprintf("PowerPoint presentation created successfully at %s", input.Filename)), nil
 }
 
 // UpdatePowerPoint creates a new PowerPoint presentation.
-func UpdatePowerPoint(ctx context.Context, input UpdatePowerPointInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+func UpdatePowerPoint(ctx context.Context, input UpdatePowerPointInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 	ppt, err := presentation.Open(input.Filename)
 	if err != nil {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to open pptx: %v", err)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to open pptx: %v", err)), nil
 	}
 
 	addSlidesToPres(ppt, input.Slides)
 
 	if err := ppt.SaveToFile(input.Filename); err != nil {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to save updated pptx: %v", err)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to save updated pptx: %v", err)), nil
 	}
-	return fantasy.NewTextResponse(fmt.Sprintf("PowerPoint presentation updated successfully at %s", input.Filename)), nil
+	return unillm.NewTextResponse(fmt.Sprintf("PowerPoint presentation updated successfully at %s", input.Filename)), nil
 }
 
 // ReadPowerPoint reads content from a PowerPoint presentation.
-func ReadPowerPoint(ctx context.Context, input ReadPowerPointInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+func ReadPowerPoint(ctx context.Context, input ReadPowerPointInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 	ppt, err := presentation.Open(input.Filename)
 	if err != nil {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to open pptx: %v", err)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to open pptx: %v", err)), nil
 	}
 
 	markdown, err := ppt.ToMarkdownWithImageURLs("")
 	if err != nil {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to convert to markdown: %v", err)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to convert to markdown: %v", err)), nil
 	}
 
-	return fantasy.NewTextResponse(markdown), nil
+	return unillm.NewTextResponse(markdown), nil
 }
 
 // -- Registration --
 
 // RegisterOfficePowerPoint registers the PowerPoint tools.
 func RegisterOfficePowerPoint(registry *tools.ToolRegistry) error {
-	createTool := fantasy.NewAgentTool(
+	createTool := unillm.NewAgentTool(
 		"office-powerpoint__create",
 		"Create a standard Presentation (.pptx).",
 		CreatePowerPoint,
@@ -125,7 +125,7 @@ func RegisterOfficePowerPoint(registry *tools.ToolRegistry) error {
 		return err
 	}
 
-	updateTool := fantasy.NewAgentTool(
+	updateTool := unillm.NewAgentTool(
 		"office-powerpoint__update",
 		"Update an existing Presentation by appending slides.",
 		UpdatePowerPoint,
@@ -134,7 +134,7 @@ func RegisterOfficePowerPoint(registry *tools.ToolRegistry) error {
 		return err
 	}
 
-	readTool := fantasy.NewAgentTool(
+	readTool := unillm.NewAgentTool(
 		"office-powerpoint__read",
 		"Read text content from a Presentation.",
 		ReadPowerPoint,

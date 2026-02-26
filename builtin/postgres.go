@@ -12,7 +12,7 @@ import (
 	"log/slog"
 
 	_ "github.com/duckdb/duckdb-go/v2"
-	"github.com/kawai-network/veridium/pkg/fantasy"
+	"github.com/getkawai/unillm"
 	"github.com/getkawai/tools"
 )
 
@@ -120,9 +120,9 @@ func RegisterPostgres(registry *tools.ToolRegistry) error {
 	}
 
 	// Register postgres_attach tool
-	attachTool := fantasy.NewAgentTool("postgres_attach",
+	attachTool := unillm.NewAgentTool("postgres_attach",
 		"Connect to a PostgreSQL database. Returns connection info. Use read_only=true (default) for safety.",
-		func(ctx context.Context, input PostgresAttachInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(ctx context.Context, input PostgresAttachInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 			return service.attach(ctx, input)
 		},
 	)
@@ -131,9 +131,9 @@ func RegisterPostgres(registry *tools.ToolRegistry) error {
 	}
 
 	// Register postgres_query tool
-	queryTool := fantasy.NewParallelAgentTool("postgres_query",
+	queryTool := unillm.NewParallelAgentTool("postgres_query",
 		"Execute a SELECT query on attached PostgreSQL database. Returns query results as JSON.",
-		func(ctx context.Context, input PostgresQueryInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(ctx context.Context, input PostgresQueryInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 			return service.query(ctx, input)
 		},
 	)
@@ -142,9 +142,9 @@ func RegisterPostgres(registry *tools.ToolRegistry) error {
 	}
 
 	// Register postgres_execute tool
-	executeTool := fantasy.NewAgentTool("postgres_execute",
+	executeTool := unillm.NewAgentTool("postgres_execute",
 		"Execute DDL/DML commands on PostgreSQL (CREATE, INSERT, UPDATE, DELETE). Requires confirm=true for dangerous operations.",
-		func(ctx context.Context, input PostgresExecuteInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(ctx context.Context, input PostgresExecuteInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 			return service.execute(ctx, input)
 		},
 	)
@@ -153,9 +153,9 @@ func RegisterPostgres(registry *tools.ToolRegistry) error {
 	}
 
 	// Register postgres_list_tables tool
-	listTool := fantasy.NewParallelAgentTool("postgres_list_tables",
+	listTool := unillm.NewParallelAgentTool("postgres_list_tables",
 		"List all tables in a PostgreSQL schema. Returns table names and row counts.",
-		func(ctx context.Context, input PostgresListTablesInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(ctx context.Context, input PostgresListTablesInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 			return service.listTables(ctx, input)
 		},
 	)
@@ -164,9 +164,9 @@ func RegisterPostgres(registry *tools.ToolRegistry) error {
 	}
 
 	// Register postgres_describe tool
-	describeTool := fantasy.NewParallelAgentTool("postgres_describe",
+	describeTool := unillm.NewParallelAgentTool("postgres_describe",
 		"Describe table schema (columns, types, constraints). Returns detailed table structure.",
-		func(ctx context.Context, input PostgresDescribeInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(ctx context.Context, input PostgresDescribeInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 			return service.describe(ctx, input)
 		},
 	)
@@ -175,9 +175,9 @@ func RegisterPostgres(registry *tools.ToolRegistry) error {
 	}
 
 	// Register postgres_detach tool
-	detachTool := fantasy.NewAgentTool("postgres_detach",
+	detachTool := unillm.NewAgentTool("postgres_detach",
 		"Disconnect from PostgreSQL database. Cleans up connection resources.",
-		func(ctx context.Context, input PostgresDetachInput, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(ctx context.Context, input PostgresDetachInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
 			return service.detach(ctx, input)
 		},
 	)
@@ -189,23 +189,23 @@ func RegisterPostgres(registry *tools.ToolRegistry) error {
 }
 
 // attach connects to PostgreSQL database
-func (s *PostgresService) attach(ctx context.Context, input PostgresAttachInput) (fantasy.ToolResponse, error) {
+func (s *PostgresService) attach(ctx context.Context, input PostgresAttachInput) (unillm.ToolResponse, error) {
 	// Validate input
 	if input.Name == "" || input.Host == "" || input.Database == "" || input.User == "" {
-		return fantasy.NewTextErrorResponse("name, host, database, and user are required"), nil
+		return unillm.NewTextErrorResponse("name, host, database, and user are required"), nil
 	}
 
 	// Validate identifiers for SQL injection protection
 	if err := validateSQLIdent(input.Name); err != nil {
-		return fantasy.NewTextErrorResponse(err.Error()), nil
+		return unillm.NewTextErrorResponse(err.Error()), nil
 	}
 	if err := validateSQLIdent(input.Schema); err != nil {
-		return fantasy.NewTextErrorResponse(err.Error()), nil
+		return unillm.NewTextErrorResponse(err.Error()), nil
 	}
 
 	// Check if already connected
 	if s.hasConnection(input.Name) {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("connection '%s' already exists", input.Name)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("connection '%s' already exists", input.Name)), nil
 	}
 
 	// Default values
@@ -247,7 +247,7 @@ func (s *PostgresService) attach(ctx context.Context, input PostgresAttachInput)
 	defer cancel()
 
 	if _, err := s.db.ExecContext(execCtx, attachCmd); err != nil {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to attach: %v", err)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to attach: %v", err)), nil
 	}
 
 	// Mark as connected
@@ -263,38 +263,38 @@ func (s *PostgresService) attach(ctx context.Context, input PostgresAttachInput)
 	}
 
 	resultJSON, _ := json.Marshal(result)
-	return fantasy.NewTextResponse(string(resultJSON)), nil
+	return unillm.NewTextResponse(string(resultJSON)), nil
 }
 
 // query executes a SELECT query
-func (s *PostgresService) query(ctx context.Context, input PostgresQueryInput) (fantasy.ToolResponse, error) {
+func (s *PostgresService) query(ctx context.Context, input PostgresQueryInput) (unillm.ToolResponse, error) {
 	// Validate input
 	if input.Connection == "" || input.Query == "" {
-		return fantasy.NewTextErrorResponse("connection and query are required"), nil
+		return unillm.NewTextErrorResponse("connection and query are required"), nil
 	}
 
 	// Validate identifier
 	if err := validateSQLIdent(input.Connection); err != nil {
-		return fantasy.NewTextErrorResponse(err.Error()), nil
+		return unillm.NewTextErrorResponse(err.Error()), nil
 	}
 
 	// Check connection exists
 	if !s.hasConnection(input.Connection) {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("connection '%s' not found. Use postgres_attach first.", input.Connection)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("connection '%s' not found. Use postgres_attach first.", input.Connection)), nil
 	}
 
 	// Validate query is SELECT
 	rawQuery := strings.TrimSpace(input.Query)
 	rawQuery = strings.TrimSuffix(rawQuery, ";")
 	if strings.Contains(rawQuery, ";") {
-		return fantasy.NewTextErrorResponse("multiple statements are not allowed in postgres_query"), nil
+		return unillm.NewTextErrorResponse("multiple statements are not allowed in postgres_query"), nil
 	}
 	queryUpper := strings.ToUpper(rawQuery)
 
 	// Strip leading CTEs and validate the actual query command
 	actualCommand := stripLeadingCTEs(queryUpper)
 	if !strings.HasPrefix(actualCommand, "SELECT") {
-		return fantasy.NewTextErrorResponse("only SELECT queries are allowed. Use postgres_execute for other commands."), nil
+		return unillm.NewTextErrorResponse("only SELECT queries are allowed. Use postgres_execute for other commands."), nil
 	}
 
 	// Additional check: ensure no DML keywords appear in the query
@@ -302,7 +302,7 @@ func (s *PostgresService) query(ctx context.Context, input PostgresQueryInput) (
 	dangerousKeywords := []string{"INSERT ", "UPDATE ", "DELETE ", "MERGE ", "DROP ", "ALTER ", "CREATE ", "TRUNCATE "}
 	for _, keyword := range dangerousKeywords {
 		if strings.Contains(queryUpper, keyword) {
-			return fantasy.NewTextErrorResponse("only SELECT queries are allowed. Use postgres_execute for other commands."), nil
+			return unillm.NewTextErrorResponse("only SELECT queries are allowed. Use postgres_execute for other commands."), nil
 		}
 	}
 
@@ -326,14 +326,14 @@ func (s *PostgresService) query(ctx context.Context, input PostgresQueryInput) (
 
 	rows, err := s.db.QueryContext(execCtx, query)
 	if err != nil {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("query failed: %v", err)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("query failed: %v", err)), nil
 	}
 	defer rows.Close()
 
 	// Get column names
 	columns, err := rows.Columns()
 	if err != nil {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to get columns: %v", err)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to get columns: %v", err)), nil
 	}
 
 	// Fetch results
@@ -347,7 +347,7 @@ func (s *PostgresService) query(ctx context.Context, input PostgresQueryInput) (
 		}
 
 		if err := rows.Scan(valuePtrs...); err != nil {
-			return fantasy.NewTextErrorResponse(fmt.Sprintf("scan failed: %v", err)), nil
+			return unillm.NewTextErrorResponse(fmt.Sprintf("scan failed: %v", err)), nil
 		}
 
 		// Build result map
@@ -365,7 +365,7 @@ func (s *PostgresService) query(ctx context.Context, input PostgresQueryInput) (
 	}
 
 	if err := rows.Err(); err != nil {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("rows iteration error: %v", err)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("rows iteration error: %v", err)), nil
 	}
 
 	response := map[string]interface{}{
@@ -376,24 +376,24 @@ func (s *PostgresService) query(ctx context.Context, input PostgresQueryInput) (
 	}
 
 	resultJSON, _ := json.MarshalIndent(response, "", "  ")
-	return fantasy.NewTextResponse(string(resultJSON)), nil
+	return unillm.NewTextResponse(string(resultJSON)), nil
 }
 
 // execute runs DDL/DML commands
-func (s *PostgresService) execute(ctx context.Context, input PostgresExecuteInput) (fantasy.ToolResponse, error) {
+func (s *PostgresService) execute(ctx context.Context, input PostgresExecuteInput) (unillm.ToolResponse, error) {
 	// Validate input
 	if input.Connection == "" || input.Command == "" {
-		return fantasy.NewTextErrorResponse("connection and command are required"), nil
+		return unillm.NewTextErrorResponse("connection and command are required"), nil
 	}
 
 	// Validate identifier
 	if err := validateSQLIdent(input.Connection); err != nil {
-		return fantasy.NewTextErrorResponse(err.Error()), nil
+		return unillm.NewTextErrorResponse(err.Error()), nil
 	}
 
 	// Check connection exists
 	if !s.hasConnection(input.Connection) {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("connection '%s' not found", input.Connection)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("connection '%s' not found", input.Connection)), nil
 	}
 
 	// Check for dangerous operations
@@ -404,7 +404,7 @@ func (s *PostgresService) execute(ctx context.Context, input PostgresExecuteInpu
 		strings.Contains(cmdUpper, "TRUNCATE")
 
 	if isDangerous && !input.Confirm {
-		return fantasy.NewTextErrorResponse("dangerous operation detected. Set confirm=true to proceed."), nil
+		return unillm.NewTextErrorResponse("dangerous operation detected. Set confirm=true to proceed."), nil
 	}
 
 	slog.InfoContext(ctx, "Executing PostgreSQL command", "connection", input.Connection, "command", input.Command)
@@ -419,7 +419,7 @@ func (s *PostgresService) execute(ctx context.Context, input PostgresExecuteInpu
 
 	result, err := s.db.ExecContext(execCtx, execQuery)
 	if err != nil {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("execution failed: %v", err)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("execution failed: %v", err)), nil
 	}
 
 	rowsAffected, _ := result.RowsAffected()
@@ -431,25 +431,25 @@ func (s *PostgresService) execute(ctx context.Context, input PostgresExecuteInpu
 	}
 
 	resultJSON, _ := json.Marshal(response)
-	return fantasy.NewTextResponse(string(resultJSON)), nil
+	return unillm.NewTextResponse(string(resultJSON)), nil
 }
 
 // listTables lists all tables in schema
-func (s *PostgresService) listTables(ctx context.Context, input PostgresListTablesInput) (fantasy.ToolResponse, error) {
+func (s *PostgresService) listTables(ctx context.Context, input PostgresListTablesInput) (unillm.ToolResponse, error) {
 	if input.Connection == "" {
-		return fantasy.NewTextErrorResponse("connection is required"), nil
+		return unillm.NewTextErrorResponse("connection is required"), nil
 	}
 
 	// Validate identifiers
 	if err := validateSQLIdent(input.Connection); err != nil {
-		return fantasy.NewTextErrorResponse(err.Error()), nil
+		return unillm.NewTextErrorResponse(err.Error()), nil
 	}
 	if err := validateSQLIdent(input.Schema); err != nil {
-		return fantasy.NewTextErrorResponse(err.Error()), nil
+		return unillm.NewTextErrorResponse(err.Error()), nil
 	}
 
 	if !s.hasConnection(input.Connection) {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("connection '%s' not found", input.Connection)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("connection '%s' not found", input.Connection)), nil
 	}
 
 	schema := input.Schema
@@ -466,7 +466,7 @@ func (s *PostgresService) listTables(ctx context.Context, input PostgresListTabl
 
 	rows, err := s.db.QueryContext(ctx, query)
 	if err != nil {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to list tables: %v", err)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to list tables: %v", err)), nil
 	}
 	defer rows.Close()
 
@@ -487,28 +487,28 @@ func (s *PostgresService) listTables(ctx context.Context, input PostgresListTabl
 	}
 
 	resultJSON, _ := json.MarshalIndent(response, "", "  ")
-	return fantasy.NewTextResponse(string(resultJSON)), nil
+	return unillm.NewTextResponse(string(resultJSON)), nil
 }
 
 // describe describes table schema
-func (s *PostgresService) describe(ctx context.Context, input PostgresDescribeInput) (fantasy.ToolResponse, error) {
+func (s *PostgresService) describe(ctx context.Context, input PostgresDescribeInput) (unillm.ToolResponse, error) {
 	if input.Connection == "" || input.Table == "" {
-		return fantasy.NewTextErrorResponse("connection and table are required"), nil
+		return unillm.NewTextErrorResponse("connection and table are required"), nil
 	}
 
 	// Validate identifiers
 	if err := validateSQLIdent(input.Connection); err != nil {
-		return fantasy.NewTextErrorResponse(err.Error()), nil
+		return unillm.NewTextErrorResponse(err.Error()), nil
 	}
 	if err := validateSQLIdent(input.Table); err != nil {
-		return fantasy.NewTextErrorResponse(err.Error()), nil
+		return unillm.NewTextErrorResponse(err.Error()), nil
 	}
 	if err := validateSQLIdent(input.Schema); err != nil {
-		return fantasy.NewTextErrorResponse(err.Error()), nil
+		return unillm.NewTextErrorResponse(err.Error()), nil
 	}
 
 	if !s.hasConnection(input.Connection) {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("connection '%s' not found", input.Connection)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("connection '%s' not found", input.Connection)), nil
 	}
 
 	schema := input.Schema
@@ -529,7 +529,7 @@ func (s *PostgresService) describe(ctx context.Context, input PostgresDescribeIn
 
 	rows, err := s.db.QueryContext(ctx, query)
 	if err != nil {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to describe table: %v", err)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to describe table: %v", err)), nil
 	}
 	defer rows.Close()
 
@@ -560,27 +560,27 @@ func (s *PostgresService) describe(ctx context.Context, input PostgresDescribeIn
 	}
 
 	resultJSON, _ := json.MarshalIndent(response, "", "  ")
-	return fantasy.NewTextResponse(string(resultJSON)), nil
+	return unillm.NewTextResponse(string(resultJSON)), nil
 }
 
 // detach disconnects from PostgreSQL
-func (s *PostgresService) detach(ctx context.Context, input PostgresDetachInput) (fantasy.ToolResponse, error) {
+func (s *PostgresService) detach(ctx context.Context, input PostgresDetachInput) (unillm.ToolResponse, error) {
 	if input.Connection == "" {
-		return fantasy.NewTextErrorResponse("connection is required"), nil
+		return unillm.NewTextErrorResponse("connection is required"), nil
 	}
 
 	// Validate identifier
 	if err := validateSQLIdent(input.Connection); err != nil {
-		return fantasy.NewTextErrorResponse(err.Error()), nil
+		return unillm.NewTextErrorResponse(err.Error()), nil
 	}
 
 	if !s.hasConnection(input.Connection) {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("connection '%s' not found", input.Connection)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("connection '%s' not found", input.Connection)), nil
 	}
 
 	detachCmd := fmt.Sprintf("DETACH %s", input.Connection)
 	if _, err := s.db.ExecContext(ctx, detachCmd); err != nil {
-		return fantasy.NewTextErrorResponse(fmt.Sprintf("failed to detach: %v", err)), nil
+		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to detach: %v", err)), nil
 	}
 
 	s.setConnection(input.Connection, false)
@@ -591,5 +591,5 @@ func (s *PostgresService) detach(ctx context.Context, input PostgresDetachInput)
 	}
 
 	resultJSON, _ := json.Marshal(result)
-	return fantasy.NewTextResponse(string(resultJSON)), nil
+	return unillm.NewTextResponse(string(resultJSON)), nil
 }
