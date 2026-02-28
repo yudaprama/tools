@@ -1,5 +1,3 @@
-//go:build !windows
-
 package builtin
 
 import (
@@ -18,7 +16,7 @@ func TestOfficeWord(t *testing.T) {
 	require.NoError(t, err)
 	defer os.RemoveAll(tmpDir)
 
-	filename := filepath.Join(tmpDir, "test.docx")
+	filename := filepath.ToSlash(filepath.Join(tmpDir, "test.docx"))
 
 	// 1. Create
 	createInput := `
@@ -75,7 +73,7 @@ func TestOfficeExcel(t *testing.T) {
 	require.NoError(t, err)
 	defer os.RemoveAll(tmpDir)
 
-	filename := filepath.Join(tmpDir, "test.xlsx")
+	filename := filepath.ToSlash(filepath.Join(tmpDir, "test.xlsx"))
 
 	// 1. Create
 	createTool := unillm.NewAgentTool("office-excel__create", "desc", CreateExcel)
@@ -108,7 +106,7 @@ func TestOfficePowerPoint(t *testing.T) {
 	require.NoError(t, err)
 	defer os.RemoveAll(tmpDir)
 
-	filename := filepath.Join(tmpDir, "test.pptx")
+	filename := filepath.ToSlash(filepath.Join(tmpDir, "test.pptx"))
 
 	// 1. Create
 	createTool := unillm.NewAgentTool("office-powerpoint__create", "desc", CreatePowerPoint)
