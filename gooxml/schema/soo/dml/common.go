@@ -215,7 +215,7 @@ func ParseUnionST_TextFontScalePercentOrPercentString(s string) (ST_TextFontScal
 	if sharedTypes.ST_PercentagePatternRe.MatchString(s) {
 		r.ST_Percentage = &s
 	} else {
-		v, err := strconv.ParseInt(s, 10, 64)
+		v, err := strconv.ParseInt(s, 10, 32)
 		if err != nil {
 			return r, fmt.Errorf("parsing %s as int", err)
 		}
