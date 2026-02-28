@@ -29,6 +29,12 @@ func RegisterAllWithDB(registry *tools.ToolRegistry, sqlDB *sql.DB) error {
 	}
 	log.Println("✅ Registered: lobe-local-system (list, read, search, write, rename, move)")
 
+	// Register PDF tool (search/replace)
+	if err := RegisterPDF(registry); err != nil {
+		return err
+	}
+	log.Println("✅ Registered: pdf_search_replace, pdf_search_text, pdf_extract_text, pdf_merge, pdf_split, pdf_page_info, pdf_metadata_get, pdf_metadata_set, pdf_extract_images")
+
 	// Register lobe-image-designer (DALL-E compatible)
 	if err := RegisterImageDesigner(registry); err != nil {
 		return err

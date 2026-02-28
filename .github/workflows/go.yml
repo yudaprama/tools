@@ -11,47 +11,7 @@ env:
   GONOSUMDB: github.com/kawai-network/*,github.com/getkawai/*
 
 jobs:
-
-  # Test the latest go version
-  # and upload the test coverage.
-  test_latest:
-    name: Go latest stable
-
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: 'stable'
-          check-latest: true
-
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Configure Git auth for private modules
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          if [ -z "${GH_TOKEN}" ]; then
-            echo "Missing GH_TOKEN secret (read access required for private modules)."
-            exit 1
-          fi
-          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
-
-      - name: Build
-        run: go build -v .
-
-      - name: Test
-        run: go test ./... -v -race -coverprofile=coverage.txt -covermode=atomic
-     
-      # - uses: codecov/codecov-action@v4
-      #   with:
-      #     files: ./coverage.txt
-      #     token: ${{ secrets.CODECOV_TOKEN }}
-
-  # Test the latest two golang version
-  # on different operating systems.
+  # Test golang on different operating systems.
   test_versions:
     strategy:
       matrix:
