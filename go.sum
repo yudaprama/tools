@@ -56,8 +56,6 @@ github.com/kaptinlin/jsonschema v0.7.3 h1:kyIydij76ORiSxmfy0xFYy0cOx8MwG6pyyaSoQ
 github.com/kaptinlin/jsonschema v0.7.3/go.mod h1:Ys6zr+W6/1330FzZEouFrAYImK+AmYt5HQVTHQQXQo8=
 github.com/kaptinlin/messageformat-go v0.4.18 h1:RBlHVWgZyoxTcUgGWBsl2AcyScq/urqbLZvzgryTmSI=
 github.com/kaptinlin/messageformat-go v0.4.18/go.mod h1:ntI3154RnqJgr7GaC+vZBnIExl2V3sv9selvRNNEM24=
-github.com/kawai-network/veridium v0.0.0-20260223154704-91e538e31def h1:rQTG561BS6tj+etSotzNc4hYmvIrJMGcq9NXIgElT1g=
-github.com/kawai-network/veridium v0.0.0-20260223154704-91e538e31def/go.mod h1:+1qkhX1myh/TaQ+oRAj7tFiM0dehSJWH7w6W9go8Jg8=
 github.com/klauspost/asmfmt v1.3.2 h1:4Ri7ox3EwapiOjCki+hw14RyKk201CN4rzyCJRFLpK4=
 github.com/klauspost/asmfmt v1.3.2/go.mod h1:AG8TuvYojzulgDAMCnYn50l/5QV3Bs/tp6j0HLHbNSE=
 github.com/klauspost/compress v1.18.3 h1:9PJRvfbmTabkOX8moIpXPbMMbYN60bWImDDU7L+/6zw=

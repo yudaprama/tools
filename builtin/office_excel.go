@@ -6,7 +6,7 @@ import (
 
 	"github.com/getkawai/unillm"
 	"github.com/getkawai/tools"
-	"github.com/kawai-network/veridium/pkg/gooxml/spreadsheet"
+	"github.com/getkawai/tools/gooxml/spreadsheet"
 )
 
 // -- Data Structures --

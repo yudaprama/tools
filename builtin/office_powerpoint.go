@@ -6,8 +6,8 @@ import (
 
 	"github.com/getkawai/unillm"
 	"github.com/getkawai/tools"
-	"github.com/kawai-network/veridium/pkg/gooxml/measurement"
-	"github.com/kawai-network/veridium/pkg/gooxml/presentation"
+	"github.com/getkawai/tools/gooxml/measurement"
+	"github.com/getkawai/tools/gooxml/presentation"
 )
 
 // -- Data Structures --

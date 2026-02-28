@@ -6,10 +6,10 @@ import (
 
 	"github.com/getkawai/unillm"
 	"github.com/getkawai/tools"
-	"github.com/kawai-network/veridium/pkg/gooxml/color"
-	"github.com/kawai-network/veridium/pkg/gooxml/document"
-	"github.com/kawai-network/veridium/pkg/gooxml/measurement"
-	"github.com/kawai-network/veridium/pkg/gooxml/schema/soo/wml"
+	"github.com/getkawai/tools/gooxml/color"
+	"github.com/getkawai/tools/gooxml/document"
+	"github.com/getkawai/tools/gooxml/measurement"
+	"github.com/getkawai/tools/gooxml/schema/soo/wml"
 )
 
 // -- Data Structures --

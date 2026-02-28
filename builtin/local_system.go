@@ -8,7 +8,7 @@ import (
 
 	"github.com/getkawai/unillm"
 	"github.com/getkawai/tools"
-	"github.com/kawai-network/veridium/pkg/localfs"
+	"github.com/getkawai/tools/localfs"
 )
 
 // ============================================================================
