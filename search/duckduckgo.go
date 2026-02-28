@@ -62,6 +62,16 @@ func (p *DuckDuckGoProvider) Name() string {
 func (p *DuckDuckGoProvider) Query(ctx context.Context, query string, params *SearchParams) (*UniformSearchResponse, error) {
 	endpoint := p.baseURL
 
+	// Return empty response for empty queries
+	if query == "" {
+		return &UniformSearchResponse{
+			CostTime:      0,
+			Query:         query,
+			ResultNumbers: 0,
+			Results:       []UniformSearchResult{},
+		}, nil
+	}
+
 	// Build query parameters
 	queryParams := url.Values{}
 	queryParams.Set("q", query)
