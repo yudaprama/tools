@@ -7,6 +7,7 @@ on:
 
 env:
   GOPRIVATE: github.com/kawai-network/*,github.com/getkawai/*
+  GONOSUMDB: github.com/kawai-network/*,github.com/getkawai/*
 
 permissions:
   contents: write
@@ -25,6 +26,17 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Configure Git auth for private modules
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          if [ -z "${GH_TOKEN}" ]; then
+            echo "Missing GH_TOKEN secret (read access required for private modules)."
+            exit 1
+          fi
+          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
 
       # Cloudsmith CLI tooling for pushing releases
       # See https://help.cloudsmith.io/docs/cli
