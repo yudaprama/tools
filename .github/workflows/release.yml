@@ -5,6 +5,9 @@ on:
     tags:
       - 'v2.*'
 
+env:
+  GOPRIVATE: github.com/kawai-network/*,github.com/getkawai/*
+
 permissions:
   contents: write
 
