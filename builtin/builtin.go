@@ -53,6 +53,12 @@ func RegisterAllWithDB(registry *tools.ToolRegistry, sqlDB *sql.DB) error {
 	}
 	log.Println("✅ Registered: calculator")
 
+	// Register MuninnDB tools (embedded memory operations)
+	if err := RegisterMuninnDB(registry); err != nil {
+		return err
+	}
+	log.Println("✅ Registered: muninn_attach, muninn_remember, muninn_remember_batch, muninn_recall, muninn_read, muninn_link, muninn_forget, muninn_status, muninn_detach")
+
 	// Register office tools (word, excel, powerpoint)
 	if err := RegisterOfficeWord(registry); err != nil {
 		return err
