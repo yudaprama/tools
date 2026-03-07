@@ -10,7 +10,7 @@ require (
 	github.com/getkawai/database v0.1.1
 	github.com/getkawai/unillm v0.1.1
 	github.com/google/uuid v1.6.0
-	github.com/kawai-network/x v1.0.26
+	github.com/kawai-network/x v1.0.30
 	github.com/kawai-network/y v0.1.14
 	github.com/scrypster/muninndb v0.0.0
 	github.com/stretchr/testify v1.11.1
@@ -77,7 +77,7 @@ require (
 	github.com/zeebo/xxh3 v1.1.0 // indirect
 	golang.org/x/crypto v0.48.0 // indirect
 	golang.org/x/exp v0.0.0-20260112195511-716be5621a96 // indirect
-	golang.org/x/image v0.0.0-20181116024801-cd38e8056d9b // indirect
+	golang.org/x/image v0.36.0 // indirect
 	golang.org/x/mod v0.32.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.41.0 // indirect
