@@ -17,7 +17,7 @@ require (
 	golang.org/x/net v0.50.0
 )
 
-replace github.com/scrypster/muninndb => github.com/getkawai/muninndb v0.3.8
+replace github.com/scrypster/muninndb => github.com/getkawai/muninndb v0.3.9
 
 require (
 	github.com/DataDog/zstd v1.4.5 // indirect
@@ -83,6 +83,7 @@ require (
 	golang.org/x/sys v0.41.0 // indirect
 	golang.org/x/telemetry v0.0.0-20260116145544-c6413dc483f5 // indirect
 	golang.org/x/text v0.34.0 // indirect
+	golang.org/x/time v0.11.0 // indirect
 	golang.org/x/tools v0.41.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
