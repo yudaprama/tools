@@ -14,7 +14,7 @@ require (
 	github.com/kawai-network/y v0.1.14
 	github.com/scrypster/muninndb v0.0.0
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/net v0.50.0
+	golang.org/x/net v0.51.0
 )
 
 replace github.com/scrypster/muninndb => github.com/getkawai/muninndb v0.3.9
