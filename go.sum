@@ -59,12 +59,12 @@ github.com/duckdb/duckdb-go-bindings/lib/windows-amd64 v0.3.3 h1:SK2sunA/MPb2T31
 github.com/duckdb/duckdb-go-bindings/lib/windows-amd64 v0.3.3/go.mod h1:K25pJL26ARblGDeuAkrdblFvUen92+CwksLtPEHRqqQ=
 github.com/duckdb/duckdb-go/v2 v2.5.5 h1:TlK8ipnzoKW2aNrjGqRkFWLCDpJDxR/VwH8ezEcvVhw=
 github.com/duckdb/duckdb-go/v2 v2.5.5/go.mod h1:6uIbC3gz36NCEygECzboygOo/Z9TeVwox/puG+ohWV0=
-github.com/getkawai/database v0.1.1 h1:vA2A1Y2EOQC6bNChBveMkWOPZM0VU89LVe3TfpvtdLc=
-github.com/getkawai/database v0.1.1/go.mod h1:x4b2XtZ5gyM8oxWXp3L76CdP8o5zo04eSlW1etfE3IY=
+github.com/getkawai/database v0.1.2 h1:33CmbOOFVK7TA+xZH8bbdlZ0J1IQm1mSPerBolmbXTw=
+github.com/getkawai/database v0.1.2/go.mod h1:2052COZ9mrp9R5pHxv687ndB1XRIGL4X+O2RtXPml04=
 github.com/getkawai/muninndb v0.3.9 h1:jRm6D3BNEmWV07zA2BOtGp5/R6nk6z4IOCg2+ONkGVA=
 github.com/getkawai/muninndb v0.3.9/go.mod h1:vsiBEBtaxhfK9S9adLeImExUAuq/i+/MyZNhcmVKoM0=
-github.com/getkawai/unillm v0.1.1 h1:Y77gVMNS990xsELknrtDjY6C7Yt6YY8NbhdVwyM1tCk=
-github.com/getkawai/unillm v0.1.1/go.mod h1:vGzh5s0pBFJ2M0ywakzrLNhHlwKNwgX1J/qME6HEeM0=
+github.com/getkawai/unillm v0.1.2 h1:swJSGMyj3Bp8cB59WE/QBIRNUJLYyg1yXPGYC2ErWLw=
+github.com/getkawai/unillm v0.1.2/go.mod h1:EBnus229YgSr8DdxjG/VCrLgKS0R5/DFcvNb5AZNkok=
 github.com/getsentry/sentry-go v0.40.0 h1:VTJMN9zbTvqDqPwheRVLcp0qcUcM+8eFivvGocAaSbo=
 github.com/getsentry/sentry-go v0.40.0/go.mod h1:eRXCoh3uvmjQLY6qu63BjUZnaBu5L5WhMV1RwYO8W5s=
 github.com/go-errors/errors v1.4.2 h1:J6MZopCL4uSllY1OfXM374weqZFFItUbrImctkmUxIA=
@@ -152,8 +152,8 @@ github.com/prometheus/common v0.64.0/go.mod h1:0gZns+BLRQ3V6NdaerOhMbwwRbNh9hkGI
 github.com/prometheus/procfs v0.15.1 h1:YagwOFzUgYfKKHX6Dr+sHT7km/hxC76UB0learggepc=
 github.com/prometheus/procfs v0.15.1/go.mod h1:fB45yRUv8NstnjriLhBQLuOUt+WW4BsoGhij/e3PBqk=
 github.com/rogpeppe/go-internal v1.9.0/go.mod h1:WtVeX8xhTBvf0smdhujwtBcq4Qrzq/fJaraNFVN+nFs=
-github.com/rogpeppe/go-internal v1.10.0 h1:TMyTOH3F/DB16zRVcYyreMH6GnZZrwQVAoYjRBZyWFQ=
-github.com/rogpeppe/go-internal v1.10.0/go.mod h1:UQnix2H7Ngw/k4C5ijL5+65zddjncjaFoBhdsK/akog=
+github.com/rogpeppe/go-internal v1.14.1 h1:UQB4HGPB6osV0SQTLymcB4TgvyWu6ZyliaW0tI/otEQ=
+github.com/rogpeppe/go-internal v1.14.1/go.mod h1:MaRKkUm5W0goXpeCfT7UZI6fk/L7L7so1lCWt35ZSgc=
 github.com/sirupsen/logrus v1.5.0/go.mod h1:+F7Ogzej0PZc/94MaYx/nvG9jOFMD2osvC3s+Squfpo=
 github.com/sirupsen/logrus v1.9.4-0.20230606125235-dd1b4c2e81af h1:Sp5TG9f7K39yfB+If0vjp97vuT74F72r8hfRpP8jLU0=
 github.com/sirupsen/logrus v1.9.4-0.20230606125235-dd1b4c2e81af/go.mod h1:naHLuLoDiP4jHNo9R0sCBMtWGeIprob74mVsIT4qYEQ=

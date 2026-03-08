@@ -7,8 +7,8 @@ require (
 	github.com/Knetic/govaluate v3.0.0+incompatible
 	github.com/andybalholm/brotli v1.2.0
 	github.com/duckdb/duckdb-go/v2 v2.5.5
-	github.com/getkawai/database v0.1.1
-	github.com/getkawai/unillm v0.1.1
+	github.com/getkawai/database v0.1.2
+	github.com/getkawai/unillm v0.1.2
 	github.com/google/uuid v1.6.0
 	github.com/kawai-network/x v1.0.30
 	github.com/kawai-network/y v0.1.14
@@ -69,7 +69,7 @@ require (
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.64.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
-	github.com/rogpeppe/go-internal v1.10.0 // indirect
+	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/sirupsen/logrus v1.9.4-0.20230606125235-dd1b4c2e81af // indirect
 	github.com/unidoc/unitype v0.2.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
