@@ -18,7 +18,6 @@ func TestMuninnTools_Registration(t *testing.T) {
 	require.NoError(t, err)
 
 	expectedTools := []string{
-		"muninn_attach",
 		"muninn_remember",
 		"muninn_remember_batch",
 		"muninn_recall",
@@ -26,7 +25,6 @@ func TestMuninnTools_Registration(t *testing.T) {
 		"muninn_link",
 		"muninn_forget",
 		"muninn_status",
-		"muninn_detach",
 	}
 
 	for _, toolName := range expectedTools {
@@ -518,7 +516,7 @@ func TestMuninnService_RememberBatchSuccess(t *testing.T) {
 	require.False(t, resp.IsError)
 
 	var out struct {
-		Count   int    `json:"count"`
+		Count    int   `json:"count"`
 		Memories []any `json:"memories"`
 	}
 	require.NoError(t, json.Unmarshal([]byte(resp.Content), &out))

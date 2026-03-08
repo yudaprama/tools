@@ -123,16 +123,6 @@ func RegisterMuninnDB(registry *tools.ToolRegistry) error {
 	service := NewMuninnDBService()
 	descriptions := mcpToolDescriptions()
 
-	attachTool := unillm.NewAgentTool("muninn_attach",
-		"Open an embedded MuninnDB connection for local memory operations.",
-		func(ctx context.Context, input MuninnAttachInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
-			return service.attach(ctx, input)
-		},
-	)
-	if err := registry.Register(attachTool); err != nil {
-		return err
-	}
-
 	rememberTool := unillm.NewAgentTool("muninn_remember",
 		mcpToolDescription(descriptions, "muninn_remember", "Store a single memory engram."),
 		func(ctx context.Context, input MuninnRememberInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
@@ -200,16 +190,6 @@ func RegisterMuninnDB(registry *tools.ToolRegistry) error {
 		},
 	)
 	if err := registry.Register(statusTool); err != nil {
-		return err
-	}
-
-	detachTool := unillm.NewAgentTool("muninn_detach",
-		"Close an embedded MuninnDB connection and release resources.",
-		func(ctx context.Context, input MuninnDetachInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
-			return service.detach(ctx, input)
-		},
-	)
-	if err := registry.Register(detachTool); err != nil {
 		return err
 	}
 
