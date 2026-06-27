@@ -6,7 +6,7 @@ require (
 	github.com/JohannesKaufmann/dom v0.2.0
 	github.com/Knetic/govaluate v3.0.0+incompatible
 	github.com/andybalholm/brotli v1.2.0
-	github.com/cloudwego/eino v0.0.0
+	github.com/cloudwego/eino v0.9.8
 	github.com/duckdb/duckdb-go/v2 v2.5.5
 	github.com/eino-contrib/jsonschema v1.0.3
 	github.com/getkawai/database v0.1.3
@@ -18,10 +18,7 @@ require (
 	golang.org/x/net v0.51.0
 )
 
-replace (
-	github.com/cloudwego/eino => ../eino
-	github.com/scrypster/muninndb => github.com/getkawai/muninndb v0.3.9
-)
+replace github.com/scrypster/muninndb => github.com/getkawai/muninndb v0.3.9
 
 require (
 	github.com/DataDog/zstd v1.4.5 // indirect
