@@ -24,7 +24,7 @@ func main() {
 	ctx := context.Background()
 
 	// --- Layer 1a: build everything + register ---------------------------------
-	allTools, err := builtin.All(ctx, nil) // nil DB -> skips image/video describe
+	allTools, err := builtin.All(ctx) // no DB-dependent tools remain
 	if err != nil {
 		log.Fatalf("build tools: %v", err)
 	}

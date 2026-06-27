@@ -30,8 +30,7 @@ go run ./example        # runnable curation + execution demo
 
 ```go
 ctx := context.Background()
-ts, err := builtin.All(ctx, nil)        // []tool.InvokableTool (skip DB tools with nil)
-// builtin.All(ctx, sqlDB)               // include lobe-image-describe / lobe-video-describe
+ts, err := builtin.All(ctx)              // []tool.InvokableTool
 
 r := tools.NewToolRegistry()
 if err := r.RegisterAll(ts); err != nil { log.Fatal(err) }
@@ -134,21 +133,16 @@ Built by `builtin.All` (see `builtin/builtin.go`):
 | `lobe-image-designer` | text2image |
 | `lobe-code-interpreter` | python |
 | `calculator` | calculator |
-| `muninndb` | remember, remember_batch, recall, read, link, forget, status |
 | `office-word` / `office-excel` / `office-powerpoint` | create, update, read each |
-| `postgres` / `mysql` | attach, query, execute, list_tables, describe, detach each (skipped if the DuckDB extension is missing) |
-| `lobe-image-describe` / `lobe-video-describe` | getImageDescription / getVideoTranscription (DB-only) |
 
-Each group is also exposed as its own constructor: `builtin.NewCalculator(ctx)`, `builtin.NewPostgres(ctx)`, etc. — returns `([]tool.InvokableTool, error)`, so you can build a single group without the rest.
+Each group is also exposed as its own constructor: `builtin.NewCalculator(ctx)`, `builtin.NewPDF(ctx)`, etc. — returns `([]tool.InvokableTool, error)`, so you can build a single group without the rest.
 
 ## Gotchas
 
-1. **`builtin.All` needs `*sql.DB` for image/video describe** — pass `nil` to skip them.
-2. **Postgres/MySQL tools may no-op in CI** — they load the DuckDB `postgres`/`mysql` extension; `All` skips the group gracefully on failure.
-3. **`Execute` takes a JSON string, not a map** — `Execute(ctx, name, argsJSON string)`. The old `map[string]string` signature is gone.
-4. **`search/` tests hit live DuckDuckGo** — they fail offline / behind a TLS-intercepting proxy; not a code issue.
-5. **Struct tags drive the schema** — there is no manual params map anymore. Bad/missing tags = a broken tool schema the model can't call.
-6. **`USAGE_GUIDE.md` is stale** — it still shows the old `unillm` API; treat `AGENTS.md` (this file) and `./example` as current.
+1. **`Execute` takes a JSON string, not a map** — `Execute(ctx, name, argsJSON string)`. The old `map[string]string` signature is gone.
+2. **`search/` tests hit live DuckDuckGo** — they fail offline / behind a TLS-intercepting proxy; not a code issue.
+3. **Struct tags drive the schema** — there is no manual params map anymore. Bad/missing tags = a broken tool schema the model can't call.
+4. **DB-backed tools were removed** — postgres/mysql (DuckDB) and image/video-describe (`getkawai/database`) tools are gone; `builtin.All(ctx)` no longer takes a `*sql.DB`. See git history if you need them back.
 
 ## Runnable demo
 
