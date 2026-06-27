@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/getkawai/unillm"
-	"github.com/yudaprama/tools"
+	"github.com/cloudwego/eino/components/tool"
+	"github.com/cloudwego/eino/components/tool/utils"
 	"github.com/yudaprama/tools/gooxml/spreadsheet"
 )
 
@@ -39,7 +39,7 @@ type ReadExcelInput struct {
 // -- Executors --
 
 // CreateExcel creates a new Excel spreadsheet.
-func CreateExcel(ctx context.Context, input CreateExcelInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+func CreateExcel(ctx context.Context, input *CreateExcelInput) (string, error) {
 	wb := spreadsheet.New()
 	sheet := wb.AddSheet()
 	for _, item := range input.Rows {
@@ -50,16 +50,16 @@ func CreateExcel(ctx context.Context, input CreateExcelInput, call unillm.ToolCa
 		}
 	}
 	if err := wb.SaveToFile(input.Filename); err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to save xlsx: %v", err)), nil
+		return "", fmt.Errorf("failed to save xlsx: %v", err)
 	}
-	return unillm.NewTextResponse(fmt.Sprintf("Excel spreadsheet created successfully at %s", input.Filename)), nil
+	return fmt.Sprintf("Excel spreadsheet created successfully at %s", input.Filename), nil
 }
 
 // UpdateExcel updates an existing Excel spreadsheet.
-func UpdateExcel(ctx context.Context, input UpdateExcelInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+func UpdateExcel(ctx context.Context, input *UpdateExcelInput) (string, error) {
 	wb, err := spreadsheet.Open(input.Filename)
 	if err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to open xlsx: %v", err)), nil
+		return "", fmt.Errorf("failed to open xlsx: %v", err)
 	}
 
 	var sheet spreadsheet.Sheet
@@ -101,52 +101,56 @@ func UpdateExcel(ctx context.Context, input UpdateExcelInput, call unillm.ToolCa
 	}
 
 	if err := wb.SaveToFile(input.Filename); err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to save updated xlsx: %v", err)), nil
+		return "", fmt.Errorf("failed to save updated xlsx: %v", err)
 	}
-	return unillm.NewTextResponse(fmt.Sprintf("Excel spreadsheet updated successfully at %s", input.Filename)), nil
+	return fmt.Sprintf("Excel spreadsheet updated successfully at %s", input.Filename), nil
 }
 
 // ReadExcel reads an Excel spreadsheet.
-func ReadExcel(ctx context.Context, input ReadExcelInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+func ReadExcel(ctx context.Context, input *ReadExcelInput) (string, error) {
 	wb, err := spreadsheet.Open(input.Filename)
 	if err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to open xlsx: %v", err)), nil
+		return "", fmt.Errorf("failed to open xlsx: %v", err)
 	}
 
 	markdown, err := wb.ToMarkdownWithImageURLs("")
 	if err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to convert to markdown: %v", err)), nil
+		return "", fmt.Errorf("failed to convert to markdown: %v", err)
 	}
 
-	return unillm.NewTextResponse(markdown), nil
+	return markdown, nil
 }
 
 // -- Registration --
 
-// RegisterOfficeExcel registers the Excel tools.
-func RegisterOfficeExcel(registry *tools.ToolRegistry) error {
-	createTool := unillm.NewAgentTool(
+// NewOfficeExcel registers the Excel tools.
+func NewOfficeExcel(ctx context.Context) ([]tool.InvokableTool, error) {
+	createTool, err := utils.InferTool(
 		"office-excel__create",
 		"Create a standard Spreadsheet (.xlsx).",
 		CreateExcel,
 	)
-	if err := registry.Register(createTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	updateTool := unillm.NewAgentTool(
+	updateTool, err := utils.InferTool(
 		"office-excel__update",
 		"Update an existing Spreadsheet by appending rows.",
 		UpdateExcel,
 	)
-	if err := registry.Register(updateTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	readTool := unillm.NewAgentTool(
+	readTool, err := utils.InferTool(
 		"office-excel__read",
 		"Read data from a Spreadsheet.",
 		ReadExcel,
 	)
-	return registry.Register(readTool)
+	if err != nil {
+		return nil, err
+	}
+
+	return []tool.InvokableTool{createTool, updateTool, readTool}, nil
 }

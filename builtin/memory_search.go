@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/getkawai/unillm"
-	"github.com/yudaprama/tools"
+	"github.com/cloudwego/eino/components/tool"
+	"github.com/cloudwego/eino/components/tool/utils"
 )
 
 // MemorySearchInput defines input for memory search tool
@@ -32,10 +32,10 @@ type MemorySearcher interface {
 	SemanticSearchByCategory(ctx context.Context, query, category string, limit int) ([]MemorySearchResult, error)
 }
 
-// RegisterMemorySearch registers the memory search tool
-func RegisterMemorySearch(registry *tools.ToolRegistry, searcher MemorySearcher) error {
-	tool := unillm.NewParallelAgentTool("search_memory",
-		`Search past conversations and stored memories about the user. 
+// NewMemorySearch creates the memory search tool.
+func NewMemorySearch(_ context.Context, searcher MemorySearcher) ([]tool.InvokableTool, error) {
+	searchMemoryTool, err := utils.InferTool("search_memory",
+		`Search past conversations and stored memories about the user.
 Use this tool when you need to:
 - Recall previous discussions or decisions
 - Remember user preferences or personal information
@@ -43,9 +43,9 @@ Use this tool when you need to:
 - Look up tasks or projects mentioned before
 
 The search uses semantic similarity, so you can describe what you're looking for in natural language.`,
-		func(ctx context.Context, input MemorySearchInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+		func(ctx context.Context, input *MemorySearchInput) (string, error) {
 			if input.Query == "" {
-				return unillm.NewTextErrorResponse("query parameter is required"), nil
+				return "", fmt.Errorf("query parameter is required")
 			}
 
 			limit := input.Limit
@@ -64,14 +64,13 @@ The search uses semantic similarity, so you can describe what you're looking for
 
 			if err != nil {
 				log.Printf("⚠️  Memory search failed: %v", err)
-				return unillm.NewTextErrorResponse(fmt.Sprintf("memory search failed: %v", err)), nil
+				return "", fmt.Errorf("memory search failed: %v", err)
 			}
 
 			if len(results) == 0 {
-				return unillm.NewTextResponse("No relevant memories found for your query."), nil
+				return "No relevant memories found for your query.", nil
 			}
 
-			// Format results for LLM
 			formattedResults := formatMemorySearchResults(results)
 
 			resultData := map[string]interface{}{
@@ -83,14 +82,17 @@ The search uses semantic similarity, so you can describe what you're looking for
 
 			resultJSON, err := json.Marshal(resultData)
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("failed to marshal results: %v", err)), nil
+				return "", fmt.Errorf("failed to marshal results: %v", err)
 			}
 
-			return unillm.NewTextResponse(string(resultJSON)), nil
+			return string(resultJSON), nil
 		},
 	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to infer search_memory tool: %w", err)
+	}
 
-	return registry.Register(tool)
+	return []tool.InvokableTool{searchMemoryTool}, nil
 }
 
 // formatMemorySearchResults formats results for human-readable output

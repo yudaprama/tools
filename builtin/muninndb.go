@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/yudaprama/tools"
-	"github.com/getkawai/unillm"
+	"github.com/cloudwego/eino/components/tool"
+	"github.com/cloudwego/eino/components/tool/utils"
 	"github.com/kawai-network/y/paths"
 	"github.com/scrypster/muninndb/pkg/embedded"
 	"github.com/scrypster/muninndb/pkg/mcp"
@@ -118,90 +118,90 @@ func NewMuninnDBService() *MuninnDBService {
 	return &MuninnDBService{core: embedded.NewService()}
 }
 
-// RegisterMuninnDB registers embedded MuninnDB tools.
-func RegisterMuninnDB(registry *tools.ToolRegistry) error {
+// NewMuninnDB creates the embedded MuninnDB tools.
+func NewMuninnDB(ctx context.Context) ([]tool.InvokableTool, error) {
 	service := NewMuninnDBService()
 	descriptions := mcpToolDescriptions()
 
-	rememberTool := unillm.NewAgentTool("muninn_remember",
+	rememberTool, err := utils.InferTool("muninn_remember",
 		mcpToolDescription(descriptions, "muninn_remember", "Store a single memory engram."),
-		func(ctx context.Context, input MuninnRememberInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
-			return service.remember(ctx, input)
+		func(ctx context.Context, input *MuninnRememberInput) (string, error) {
+			return service.remember(ctx, *input)
 		},
 	)
-	if err := registry.Register(rememberTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	rememberBatchTool := unillm.NewAgentTool("muninn_remember_batch",
+	rememberBatchTool, err := utils.InferTool("muninn_remember_batch",
 		mcpToolDescription(descriptions, "muninn_remember_batch", "Store multiple memories in one request (max 50)."),
-		func(ctx context.Context, input MuninnRememberBatchInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
-			return service.rememberBatch(ctx, input)
+		func(ctx context.Context, input *MuninnRememberBatchInput) (string, error) {
+			return service.rememberBatch(ctx, *input)
 		},
 	)
-	if err := registry.Register(rememberBatchTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	recallTool := unillm.NewParallelAgentTool("muninn_recall",
+	recallTool, err := utils.InferTool("muninn_recall",
 		mcpToolDescription(descriptions, "muninn_recall", "Recall relevant memories using context cues."),
-		func(ctx context.Context, input MuninnRecallInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
-			return service.recall(ctx, input)
+		func(ctx context.Context, input *MuninnRecallInput) (string, error) {
+			return service.recall(ctx, *input)
 		},
 	)
-	if err := registry.Register(recallTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	readTool := unillm.NewParallelAgentTool("muninn_read",
+	readTool, err := utils.InferTool("muninn_read",
 		mcpToolDescription(descriptions, "muninn_read", "Read one memory by ID."),
-		func(ctx context.Context, input MuninnReadInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
-			return service.read(ctx, input)
+		func(ctx context.Context, input *MuninnReadInput) (string, error) {
+			return service.read(ctx, *input)
 		},
 	)
-	if err := registry.Register(readTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	linkTool := unillm.NewAgentTool("muninn_link",
+	linkTool, err := utils.InferTool("muninn_link",
 		mcpToolDescription(descriptions, "muninn_link", "Create or update a relationship between two memories."),
-		func(ctx context.Context, input MuninnLinkInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
-			return service.link(ctx, input)
+		func(ctx context.Context, input *MuninnLinkInput) (string, error) {
+			return service.link(ctx, *input)
 		},
 	)
-	if err := registry.Register(linkTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	forgetTool := unillm.NewAgentTool("muninn_forget",
+	forgetTool, err := utils.InferTool("muninn_forget",
 		mcpToolDescription(descriptions, "muninn_forget", "Forget one memory (soft delete by default)."),
-		func(ctx context.Context, input MuninnForgetInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
-			return service.forget(ctx, input)
+		func(ctx context.Context, input *MuninnForgetInput) (string, error) {
+			return service.forget(ctx, *input)
 		},
 	)
-	if err := registry.Register(forgetTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	statusTool := unillm.NewParallelAgentTool("muninn_status",
+	statusTool, err := utils.InferTool("muninn_status",
 		mcpToolDescription(descriptions, "muninn_status", "Get memory and coherence stats for a vault."),
-		func(ctx context.Context, input MuninnStatusInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
-			return service.status(ctx, input)
+		func(ctx context.Context, input *MuninnStatusInput) (string, error) {
+			return service.status(ctx, *input)
 		},
 	)
-	if err := registry.Register(statusTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	return nil
+	return []tool.InvokableTool{rememberTool, rememberBatchTool, recallTool, readTool, linkTool, forgetTool, statusTool}, nil
 }
 
-func (s *MuninnDBService) attach(_ context.Context, input MuninnAttachInput) (unillm.ToolResponse, error) {
+func (s *MuninnDBService) attach(_ context.Context, input MuninnAttachInput) (string, error) {
 	if strings.TrimSpace(input.Name) == "" {
-		return unillm.NewTextErrorResponse("name is required"), nil
+		return "", fmt.Errorf("name is required")
 	}
 	if err := validateSQLIdent(input.Name); err != nil {
-		return unillm.NewTextErrorResponse(err.Error()), nil
+		return "", err
 	}
 
 	dataDir := strings.TrimSpace(input.DataDir)
@@ -222,9 +222,9 @@ func (s *MuninnDBService) attach(_ context.Context, input MuninnAttachInput) (un
 	})
 	if err != nil {
 		if strings.Contains(err.Error(), "already exists") || strings.Contains(err.Error(), "is being initialized") {
-			return unillm.NewTextErrorResponse(err.Error()), nil
+			return "", err
 		}
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to open muninndb: %v", err)), nil
+		return "", fmt.Errorf("failed to open muninndb: %v", err)
 	}
 
 	result := map[string]any{
@@ -233,28 +233,28 @@ func (s *MuninnDBService) attach(_ context.Context, input MuninnAttachInput) (un
 		"data_dir":      dataDir,
 		"default_vault": input.DefaultVault,
 	}
-	return marshalToolResponse(result)
+	return marshalToolResult(result)
 }
 
-func (s *MuninnDBService) detach(_ context.Context, input MuninnDetachInput) (unillm.ToolResponse, error) {
+func (s *MuninnDBService) detach(_ context.Context, input MuninnDetachInput) (string, error) {
 	if strings.TrimSpace(input.Connection) == "" {
-		return unillm.NewTextErrorResponse("connection is required"), nil
+		return "", fmt.Errorf("connection is required")
 	}
 	if err := validateSQLIdent(input.Connection); err != nil {
-		return unillm.NewTextErrorResponse(err.Error()), nil
+		return "", err
 	}
 	if err := s.core.Detach(input.Connection); err != nil {
-		return unillm.NewTextErrorResponse(err.Error()), nil
+		return "", err
 	}
 
 	result := map[string]any{"status": "disconnected", "connection": input.Connection}
-	return marshalToolResponse(result)
+	return marshalToolResult(result)
 }
 
-func (s *MuninnDBService) remember(ctx context.Context, input MuninnRememberInput) (unillm.ToolResponse, error) {
+func (s *MuninnDBService) remember(ctx context.Context, input MuninnRememberInput) (string, error) {
 	createdAt, err := embedded.ParseCreatedAt(input.CreatedAt)
 	if err != nil {
-		return unillm.NewTextErrorResponse(err.Error()), nil
+		return "", err
 	}
 
 	resp, err := s.core.Remember(ctx, embedded.RememberInput{
@@ -272,17 +272,17 @@ func (s *MuninnDBService) remember(ctx context.Context, input MuninnRememberInpu
 		Summary:      input.Summary,
 	})
 	if err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to remember: %v", err)), nil
+		return "", fmt.Errorf("failed to remember: %v", err)
 	}
-	return marshalToolResponse(resp)
+	return marshalToolResult(resp)
 }
 
-func (s *MuninnDBService) rememberBatch(ctx context.Context, input MuninnRememberBatchInput) (unillm.ToolResponse, error) {
+func (s *MuninnDBService) rememberBatch(ctx context.Context, input MuninnRememberBatchInput) (string, error) {
 	items := make([]embedded.RememberBatchItem, 0, len(input.Memories))
 	for i := range input.Memories {
 		createdAt, err := embedded.ParseCreatedAt(input.Memories[i].CreatedAt)
 		if err != nil {
-			return unillm.NewTextErrorResponse(fmt.Sprintf("memory index %d: %v", i, err)), nil
+			return "", fmt.Errorf("memory index %d: %v", i, err)
 		}
 		item := input.Memories[i]
 		items = append(items, embedded.RememberBatchItem{
@@ -306,13 +306,13 @@ func (s *MuninnDBService) rememberBatch(ctx context.Context, input MuninnRemembe
 		Memories:   items,
 	})
 	if err != nil {
-		return unillm.NewTextErrorResponse(err.Error()), nil
+		return "", err
 	}
 
-	return marshalToolResponse(map[string]any{"count": len(written), "memories": written})
+	return marshalToolResult(map[string]any{"count": len(written), "memories": written})
 }
 
-func (s *MuninnDBService) recall(ctx context.Context, input MuninnRecallInput) (unillm.ToolResponse, error) {
+func (s *MuninnDBService) recall(ctx context.Context, input MuninnRecallInput) (string, error) {
 	resp, err := s.core.Recall(ctx, embedded.RecallInput{
 		Connection: input.Connection,
 		Vault:      input.Vault,
@@ -323,25 +323,25 @@ func (s *MuninnDBService) recall(ctx context.Context, input MuninnRecallInput) (
 		IncludeWhy: input.IncludeWhy,
 	})
 	if err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to recall: %v", err)), nil
+		return "", fmt.Errorf("failed to recall: %v", err)
 	}
 
-	return marshalToolResponse(resp)
+	return marshalToolResult(resp)
 }
 
-func (s *MuninnDBService) read(ctx context.Context, input MuninnReadInput) (unillm.ToolResponse, error) {
+func (s *MuninnDBService) read(ctx context.Context, input MuninnReadInput) (string, error) {
 	resp, err := s.core.Read(ctx, embedded.ReadInput{
 		Connection: input.Connection,
 		Vault:      input.Vault,
 		ID:         input.ID,
 	})
 	if err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to read: %v", err)), nil
+		return "", fmt.Errorf("failed to read: %v", err)
 	}
-	return marshalToolResponse(resp)
+	return marshalToolResult(resp)
 }
 
-func (s *MuninnDBService) link(ctx context.Context, input MuninnLinkInput) (unillm.ToolResponse, error) {
+func (s *MuninnDBService) link(ctx context.Context, input MuninnLinkInput) (string, error) {
 	resp, err := s.core.Link(ctx, embedded.LinkInput{
 		Connection: input.Connection,
 		Vault:      input.Vault,
@@ -351,12 +351,12 @@ func (s *MuninnDBService) link(ctx context.Context, input MuninnLinkInput) (unil
 		Weight:     input.Weight,
 	})
 	if err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to link: %v", err)), nil
+		return "", fmt.Errorf("failed to link: %v", err)
 	}
-	return marshalToolResponse(resp)
+	return marshalToolResult(resp)
 }
 
-func (s *MuninnDBService) forget(ctx context.Context, input MuninnForgetInput) (unillm.ToolResponse, error) {
+func (s *MuninnDBService) forget(ctx context.Context, input MuninnForgetInput) (string, error) {
 	resp, err := s.core.Forget(ctx, embedded.ForgetInput{
 		Connection: input.Connection,
 		Vault:      input.Vault,
@@ -364,25 +364,25 @@ func (s *MuninnDBService) forget(ctx context.Context, input MuninnForgetInput) (
 		Hard:       input.Hard,
 	})
 	if err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to forget: %v", err)), nil
+		return "", fmt.Errorf("failed to forget: %v", err)
 	}
-	return marshalToolResponse(resp)
+	return marshalToolResult(resp)
 }
 
-func (s *MuninnDBService) status(ctx context.Context, input MuninnStatusInput) (unillm.ToolResponse, error) {
+func (s *MuninnDBService) status(ctx context.Context, input MuninnStatusInput) (string, error) {
 	resp, err := s.core.Status(ctx, embedded.StatusInput{Connection: input.Connection, Vault: input.Vault})
 	if err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to get status: %v", err)), nil
+		return "", fmt.Errorf("failed to get status: %v", err)
 	}
-	return marshalToolResponse(resp)
+	return marshalToolResult(resp)
 }
 
-func marshalToolResponse(v any) (unillm.ToolResponse, error) {
+func marshalToolResult(v any) (string, error) {
 	resultJSON, err := json.Marshal(v)
 	if err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to marshal result: %v", err)), nil
+		return "", fmt.Errorf("failed to marshal result: %v", err)
 	}
-	return unillm.NewTextResponse(string(resultJSON)), nil
+	return string(resultJSON), nil
 }
 
 func sanitizeDirName(value string) string {

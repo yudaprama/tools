@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/yudaprama/tools"
-	"github.com/getkawai/unillm"
 	pdfcreator "github.com/kawai-network/x/pdf/creator"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -163,8 +162,11 @@ func TestParsePDFPageSpec(t *testing.T) {
 }
 
 func TestRegisterPDFTools(t *testing.T) {
+	ctx := context.Background()
+	pdfTools, err := NewPDF(ctx)
+	require.NoError(t, err)
 	registry := tools.NewToolRegistry()
-	require.NoError(t, RegisterPDF(registry))
+	require.NoError(t, registry.RegisterAll(pdfTools))
 
 	for _, name := range []string{
 		"pdf_search_replace",
@@ -191,38 +193,29 @@ func TestPDFToolsRun(t *testing.T) {
 	outputPath := filepath.ToSlash(filepath.Join(tmpDir, "output.pdf"))
 	require.NoError(t, createTestPDF(inputPath, "Search me please"))
 
+	ctx := context.Background()
+	pdfTools, err := NewPDF(ctx)
+	require.NoError(t, err)
 	registry := tools.NewToolRegistry()
-	require.NoError(t, RegisterPDF(registry))
+	require.NoError(t, registry.RegisterAll(pdfTools))
 
 	searchTool, ok := registry.Get("pdf_search_text")
 	require.True(t, ok)
-	resp, err := searchTool.Run(context.Background(), unillm.ToolCall{
-		Name:  "pdf_search_text",
-		Input: `{"pattern":"Search","inputPath":"` + inputPath + `"}`,
-	})
+	content, err := searchTool.InvokableRun(ctx, `{"pattern":"Search","inputPath":"`+inputPath+`"}`)
 	require.NoError(t, err)
-	assert.False(t, resp.IsError)
-	assert.True(t, strings.Contains(resp.Content, "Search"))
+	assert.True(t, strings.Contains(content, "Search"))
 
 	extractTool, ok := registry.Get("pdf_extract_text")
 	require.True(t, ok)
-	resp, err = extractTool.Run(context.Background(), unillm.ToolCall{
-		Name:  "pdf_extract_text",
-		Input: `{"inputPath":"` + inputPath + `"}`,
-	})
+	content, err = extractTool.InvokableRun(ctx, `{"inputPath":"`+inputPath+`"}`)
 	require.NoError(t, err)
-	assert.False(t, resp.IsError)
-	assert.True(t, strings.Contains(resp.Content, "Search me please"))
+	assert.True(t, strings.Contains(content, "Search me please"))
 
 	replaceTool, ok := registry.Get("pdf_search_replace")
 	require.True(t, ok)
-	resp, err = replaceTool.Run(context.Background(), unillm.ToolCall{
-		Name: "pdf_search_replace",
-		Input: `{"pattern":"Search","replacement":"Find","inputPath":"` + inputPath +
-			`","outputPath":"` + outputPath + `"}`,
-	})
+	_, err = replaceTool.InvokableRun(ctx, `{"pattern":"Search","replacement":"Find","inputPath":"`+inputPath+
+		`","outputPath":"`+outputPath+`"}`)
 	require.NoError(t, err)
-	assert.False(t, resp.IsError)
 
 	after, err := doPDFExtract(outputPath, "*")
 	require.NoError(t, err)

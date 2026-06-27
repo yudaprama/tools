@@ -13,8 +13,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/yudaprama/tools"
-	"github.com/getkawai/unillm"
+	"github.com/cloudwego/eino/components/tool"
+	"github.com/cloudwego/eino/components/tool/utils"
 	"github.com/kawai-network/x/pdf/core"
 	pdfextractor "github.com/kawai-network/x/pdf/extractor"
 	pdfmodel "github.com/kawai-network/x/pdf/model"
@@ -82,174 +82,186 @@ type PDFExtractImagesInput struct {
 	Format    string `json:"format,omitempty" jsonschema:"description=Output image format: png or jpg. Defaults to png"`
 }
 
-// RegisterPDF registers PDF tools backed by github.com/kawai-network/x/pdf.
-func RegisterPDF(registry *tools.ToolRegistry) error {
-	searchReplaceTool := unillm.NewParallelAgentTool("pdf_search_replace",
+// NewPDF registers PDF tools backed by github.com/kawai-network/x/pdf.
+func NewPDF(_ context.Context) ([]tool.InvokableTool, error) {
+	searchReplaceTool, err := utils.InferTool("pdf_search_replace",
 		"Search and replace text in PDF files using kawai-network/x/pdf",
-		func(ctx context.Context, input PDFSearchReplaceInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
-			matches, err := doPDFSearchReplace(input)
+		func(ctx context.Context, input *PDFSearchReplaceInput) (string, error) {
+			matches, err := doPDFSearchReplace(*input)
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("pdf_search_replace failed: %v", err)), nil
+				return "", fmt.Errorf("pdf_search_replace failed: %v", err)
 			}
-			return unillm.NewTextResponse(
-				fmt.Sprintf(
-					"Replaced %q with %q. Matches found on %d page(s). Output: %s",
-					input.Pattern,
-					input.Replacement,
-					len(matches),
-					input.OutputPath,
-				),
+			return fmt.Sprintf(
+				"Replaced %q with %q. Matches found on %d page(s). Output: %s",
+				input.Pattern,
+				input.Replacement,
+				len(matches),
+				input.OutputPath,
 			), nil
 		},
 	)
-	if err := registry.Register(searchReplaceTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	searchTool := unillm.NewParallelAgentTool("pdf_search_text",
+	searchTool, err := utils.InferTool("pdf_search_text",
 		"Search text in PDF files and return page-level match information",
-		func(ctx context.Context, input PDFSearchTextInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+		func(ctx context.Context, input *PDFSearchTextInput) (string, error) {
 			matches, err := doPDFSearch(input.Pattern, input.InputPath, input.Pages)
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("pdf_search_text failed: %v", err)), nil
+				return "", fmt.Errorf("pdf_search_text failed: %v", err)
 			}
 			payload, err := json.Marshal(map[string]any{
 				"pattern": input.Pattern,
 				"matches": matches,
 			})
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("failed to encode response: %v", err)), nil
+				return "", fmt.Errorf("failed to encode response: %v", err)
 			}
-			return unillm.NewTextResponse(string(payload)), nil
+			return string(payload), nil
 		},
 	)
-	if err := registry.Register(searchTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	extractTool := unillm.NewParallelAgentTool("pdf_extract_text",
+	extractTool, err := utils.InferTool("pdf_extract_text",
 		"Extract text from PDF pages",
-		func(ctx context.Context, input PDFExtractTextInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+		func(ctx context.Context, input *PDFExtractTextInput) (string, error) {
 			texts, err := doPDFExtract(input.InputPath, input.Pages)
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("pdf_extract_text failed: %v", err)), nil
+				return "", fmt.Errorf("pdf_extract_text failed: %v", err)
 			}
 			payload, err := json.Marshal(map[string]any{"pages": texts})
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("failed to encode response: %v", err)), nil
+				return "", fmt.Errorf("failed to encode response: %v", err)
 			}
-			return unillm.NewTextResponse(string(payload)), nil
+			return string(payload), nil
 		},
 	)
-	if err := registry.Register(extractTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	mergeTool := unillm.NewParallelAgentTool("pdf_merge",
+	mergeTool, err := utils.InferTool("pdf_merge",
 		"Merge multiple PDF files into one output PDF",
-		func(ctx context.Context, input PDFMergeInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
-			result, err := doPDFMerge(input)
+		func(ctx context.Context, input *PDFMergeInput) (string, error) {
+			result, err := doPDFMerge(*input)
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("pdf_merge failed: %v", err)), nil
+				return "", fmt.Errorf("pdf_merge failed: %v", err)
 			}
 			payload, err := json.Marshal(result)
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("failed to encode response: %v", err)), nil
+				return "", fmt.Errorf("failed to encode response: %v", err)
 			}
-			return unillm.NewTextResponse(string(payload)), nil
+			return string(payload), nil
 		},
 	)
-	if err := registry.Register(mergeTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	splitTool := unillm.NewParallelAgentTool("pdf_split",
+	splitTool, err := utils.InferTool("pdf_split",
 		"Split a PDF into multiple output PDFs",
-		func(ctx context.Context, input PDFSplitInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
-			result, err := doPDFSplit(input)
+		func(ctx context.Context, input *PDFSplitInput) (string, error) {
+			result, err := doPDFSplit(*input)
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("pdf_split failed: %v", err)), nil
+				return "", fmt.Errorf("pdf_split failed: %v", err)
 			}
 			payload, err := json.Marshal(result)
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("failed to encode response: %v", err)), nil
+				return "", fmt.Errorf("failed to encode response: %v", err)
 			}
-			return unillm.NewTextResponse(string(payload)), nil
+			return string(payload), nil
 		},
 	)
-	if err := registry.Register(splitTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	pageInfoTool := unillm.NewParallelAgentTool("pdf_page_info",
+	pageInfoTool, err := utils.InferTool("pdf_page_info",
 		"Get PDF page count and page-level size/rotation information",
-		func(ctx context.Context, input PDFPageInfoInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+		func(ctx context.Context, input *PDFPageInfoInput) (string, error) {
 			result, err := doPDFPageInfo(input.InputPath)
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("pdf_page_info failed: %v", err)), nil
+				return "", fmt.Errorf("pdf_page_info failed: %v", err)
 			}
 			payload, err := json.Marshal(result)
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("failed to encode response: %v", err)), nil
+				return "", fmt.Errorf("failed to encode response: %v", err)
 			}
-			return unillm.NewTextResponse(string(payload)), nil
+			return string(payload), nil
 		},
 	)
-	if err := registry.Register(pageInfoTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	metadataGetTool := unillm.NewParallelAgentTool("pdf_metadata_get",
+	metadataGetTool, err := utils.InferTool("pdf_metadata_get",
 		"Get document metadata from a PDF Info dictionary",
-		func(ctx context.Context, input PDFMetadataGetInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+		func(ctx context.Context, input *PDFMetadataGetInput) (string, error) {
 			meta, err := readPDFMetadata(input.InputPath)
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("pdf_metadata_get failed: %v", err)), nil
+				return "", fmt.Errorf("pdf_metadata_get failed: %v", err)
 			}
 			payload, err := json.Marshal(map[string]any{"metadata": meta})
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("failed to encode response: %v", err)), nil
+				return "", fmt.Errorf("failed to encode response: %v", err)
 			}
-			return unillm.NewTextResponse(string(payload)), nil
+			return string(payload), nil
 		},
 	)
-	if err := registry.Register(metadataGetTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	metadataSetTool := unillm.NewParallelAgentTool("pdf_metadata_set",
+	metadataSetTool, err := utils.InferTool("pdf_metadata_set",
 		"Set document metadata fields (Title, Author, Subject, Keywords, Creator, Producer)",
-		func(ctx context.Context, input PDFMetadataSetInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
-			result, err := doPDFMetadataSet(input)
+		func(ctx context.Context, input *PDFMetadataSetInput) (string, error) {
+			result, err := doPDFMetadataSet(*input)
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("pdf_metadata_set failed: %v", err)), nil
+				return "", fmt.Errorf("pdf_metadata_set failed: %v", err)
 			}
 			payload, err := json.Marshal(result)
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("failed to encode response: %v", err)), nil
+				return "", fmt.Errorf("failed to encode response: %v", err)
 			}
-			return unillm.NewTextResponse(string(payload)), nil
+			return string(payload), nil
 		},
 	)
-	if err := registry.Register(metadataSetTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	extractImagesTool := unillm.NewParallelAgentTool("pdf_extract_images",
+	extractImagesTool, err := utils.InferTool("pdf_extract_images",
 		"Extract raster images from PDF pages",
-		func(ctx context.Context, input PDFExtractImagesInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
-			result, err := doPDFExtractImages(input)
+		func(ctx context.Context, input *PDFExtractImagesInput) (string, error) {
+			result, err := doPDFExtractImages(*input)
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("pdf_extract_images failed: %v", err)), nil
+				return "", fmt.Errorf("pdf_extract_images failed: %v", err)
 			}
 			payload, err := json.Marshal(result)
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("failed to encode response: %v", err)), nil
+				return "", fmt.Errorf("failed to encode response: %v", err)
 			}
-			return unillm.NewTextResponse(string(payload)), nil
+			return string(payload), nil
 		},
 	)
-	return registry.Register(extractImagesTool)
+	if err != nil {
+		return nil, err
+	}
+
+	return []tool.InvokableTool{
+		searchReplaceTool,
+		searchTool,
+		extractTool,
+		mergeTool,
+		splitTool,
+		pageInfoTool,
+		metadataGetTool,
+		metadataSetTool,
+		extractImagesTool,
+	}, nil
 }
 
 type pdfMergeResult struct {

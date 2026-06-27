@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/getkawai/unillm"
-	"github.com/yudaprama/tools"
+	"github.com/cloudwego/eino/components/tool"
+	"github.com/cloudwego/eino/components/tool/utils"
 	"github.com/yudaprama/tools/search"
 )
 
@@ -17,15 +17,15 @@ type WebSearchInput struct {
 	MaxResults int    `json:"max_results,omitempty" jsonschema:"description=Maximum number of results (default: 10)"`
 }
 
-// RegisterWebSearch registers the web search tool
-func RegisterWebSearch(registry *tools.ToolRegistry) error {
+// NewWebSearch creates the web search tool.
+func NewWebSearch(_ context.Context) ([]tool.InvokableTool, error) {
 	searchService := search.NewService()
 
-	tool := unillm.NewParallelAgentTool("web_search",
+	webSearchTool, err := utils.InferTool("web_search",
 		"Search the web for current information using Brave Search. Returns real-time search results with titles, URLs, and descriptions.",
-		func(ctx context.Context, input WebSearchInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+		func(ctx context.Context, input *WebSearchInput) (string, error) {
 			if input.Query == "" {
-				return unillm.NewTextErrorResponse("query parameter is required"), nil
+				return "", fmt.Errorf("query parameter is required")
 			}
 
 			maxResults := input.MaxResults
@@ -33,7 +33,6 @@ func RegisterWebSearch(registry *tools.ToolRegistry) error {
 				maxResults = 10
 			}
 
-			// Use real Brave Search API
 			searchQuery := search.SearchQuery{
 				Query:            input.Query,
 				SearchCategories: []string{"general"},
@@ -44,10 +43,9 @@ func RegisterWebSearch(registry *tools.ToolRegistry) error {
 			response, err := searchService.WebSearch(searchQuery)
 			if err != nil {
 				log.Printf("⚠️  Web search failed: %v", err)
-				return unillm.NewTextErrorResponse(fmt.Sprintf("search failed: %v", err)), nil
+				return "", fmt.Errorf("search failed: %v", err)
 			}
 
-			// Format results for LLM
 			results := make([]map[string]interface{}, 0, len(response.Results))
 			for i, result := range response.Results {
 				if i >= maxResults {
@@ -69,12 +67,15 @@ func RegisterWebSearch(registry *tools.ToolRegistry) error {
 
 			resultJSON, err := json.Marshal(resultData)
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("failed to marshal results: %v", err)), nil
+				return "", fmt.Errorf("failed to marshal results: %v", err)
 			}
 
-			return unillm.NewTextResponse(string(resultJSON)), nil
+			return string(resultJSON), nil
 		},
 	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to infer web_search tool: %w", err)
+	}
 
-	return registry.Register(tool)
+	return []tool.InvokableTool{webSearchTool}, nil
 }

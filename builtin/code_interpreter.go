@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/getkawai/unillm"
-	"github.com/yudaprama/tools"
+	"github.com/cloudwego/eino/components/tool"
+	"github.com/cloudwego/eino/components/tool/utils"
 )
 
 // PythonCodeInput defines input for code interpreter tool
@@ -214,31 +214,34 @@ func escapeCode(code string) string {
 // Tool Registration
 // ============================================================================
 
-// RegisterCodeInterpreter registers the lobe-code-interpreter tool
-func RegisterCodeInterpreter(registry *tools.ToolRegistry) error {
+// NewCodeInterpreter creates the lobe-code-interpreter tool.
+func NewCodeInterpreter(_ context.Context) ([]tool.InvokableTool, error) {
 	service := NewCodeInterpreterService()
 
-	tool := unillm.NewAgentTool("lobe-code-interpreter__python",
+	pythonTool, err := utils.InferTool("lobe-code-interpreter__python",
 		"Execute Python code. Use this to run Python scripts, perform calculations, data analysis, or generate files.",
-		func(ctx context.Context, input PythonCodeInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+		func(ctx context.Context, input *PythonCodeInput) (string, error) {
 			if input.Code == "" {
-				return unillm.NewTextErrorResponse("code is required"), nil
+				return "", fmt.Errorf("code is required")
 			}
 
 			log.Printf("🐍 Executing Python code (%d chars, %d packages)", len(input.Code), len(input.Packages))
 
 			response, err := service.ExecutePython(input.Code, input.Packages)
 			if err != nil {
-				return unillm.NewTextErrorResponse(err.Error()), nil
+				return "", err
 			}
 
 			resultJSON, _ := json.Marshal(response)
 			log.Printf("✅ Python execution complete (result: %v, outputs: %d, files: %d)",
 				response.Result != "", len(response.Output), len(response.Files))
 
-			return unillm.NewTextResponse(string(resultJSON)), nil
+			return string(resultJSON), nil
 		},
 	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to infer python tool: %w", err)
+	}
 
-	return registry.Register(tool)
+	return []tool.InvokableTool{pythonTool}, nil
 }

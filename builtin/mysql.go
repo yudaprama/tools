@@ -12,8 +12,8 @@ import (
 	"log/slog"
 
 	_ "github.com/duckdb/duckdb-go/v2"
-	"github.com/getkawai/unillm"
-	"github.com/yudaprama/tools"
+	"github.com/cloudwego/eino/components/tool"
+	"github.com/cloudwego/eino/components/tool/utils"
 )
 
 // MySQLService manages MySQL connections via DuckDB
@@ -113,102 +113,96 @@ type MySQLDetachInput struct {
 	Connection string `json:"connection" jsonschema:"required,description=Connection name to detach"`
 }
 
-// RegisterMySQL registers all MySQL tools
-func RegisterMySQL(registry *tools.ToolRegistry) error {
+// NewMySQL registers all MySQL tools
+func NewMySQL(_ context.Context) ([]tool.InvokableTool, error) {
 	service, err := NewMySQLService()
 	if err != nil {
-		return fmt.Errorf("failed to create mysql service: %w", err)
+		return nil, fmt.Errorf("failed to create mysql service: %w", err)
 	}
 
-	// Register mysql_attach tool
-	attachTool := unillm.NewAgentTool("mysql_attach",
+	attachTool, err := utils.InferTool("mysql_attach",
 		"Connect to a MySQL database. Returns connection info. Use read_only=true (default) for safety.",
-		func(ctx context.Context, input MySQLAttachInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
-			return service.attach(ctx, input)
+		func(ctx context.Context, input *MySQLAttachInput) (string, error) {
+			return service.attach(ctx, *input)
 		},
 	)
-	if err := registry.Register(attachTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	// Register mysql_query tool
-	queryTool := unillm.NewParallelAgentTool("mysql_query",
+	queryTool, err := utils.InferTool("mysql_query",
 		"Execute a SELECT query on attached MySQL database. Returns query results as JSON.",
-		func(ctx context.Context, input MySQLQueryInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
-			return service.query(ctx, input)
+		func(ctx context.Context, input *MySQLQueryInput) (string, error) {
+			return service.query(ctx, *input)
 		},
 	)
-	if err := registry.Register(queryTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	// Register mysql_execute tool
-	executeTool := unillm.NewAgentTool("mysql_execute",
+	executeTool, err := utils.InferTool("mysql_execute",
 		"Execute DDL/DML commands on MySQL (CREATE, INSERT, UPDATE, DELETE). Requires confirm=true for dangerous operations.",
-		func(ctx context.Context, input MySQLExecuteInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
-			return service.execute(ctx, input)
+		func(ctx context.Context, input *MySQLExecuteInput) (string, error) {
+			return service.execute(ctx, *input)
 		},
 	)
-	if err := registry.Register(executeTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	// Register mysql_list_tables tool
-	listTool := unillm.NewParallelAgentTool("mysql_list_tables",
+	listTool, err := utils.InferTool("mysql_list_tables",
 		"List all tables in a MySQL database. Returns table names and row counts.",
-		func(ctx context.Context, input MySQLListTablesInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
-			return service.listTables(ctx, input)
+		func(ctx context.Context, input *MySQLListTablesInput) (string, error) {
+			return service.listTables(ctx, *input)
 		},
 	)
-	if err := registry.Register(listTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	// Register mysql_describe tool
-	describeTool := unillm.NewParallelAgentTool("mysql_describe",
+	describeTool, err := utils.InferTool("mysql_describe",
 		"Describe table schema (columns, types, constraints). Returns detailed table structure.",
-		func(ctx context.Context, input MySQLDescribeInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
-			return service.describe(ctx, input)
+		func(ctx context.Context, input *MySQLDescribeInput) (string, error) {
+			return service.describe(ctx, *input)
 		},
 	)
-	if err := registry.Register(describeTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	// Register mysql_detach tool
-	detachTool := unillm.NewAgentTool("mysql_detach",
+	detachTool, err := utils.InferTool("mysql_detach",
 		"Disconnect from MySQL database. Cleans up connection resources.",
-		func(ctx context.Context, input MySQLDetachInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
-			return service.detach(ctx, input)
+		func(ctx context.Context, input *MySQLDetachInput) (string, error) {
+			return service.detach(ctx, *input)
 		},
 	)
-	if err := registry.Register(detachTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	return nil
+	return []tool.InvokableTool{attachTool, queryTool, executeTool, listTool, describeTool, detachTool}, nil
 }
 
 // attach connects to MySQL database
-func (s *MySQLService) attach(ctx context.Context, input MySQLAttachInput) (unillm.ToolResponse, error) {
+func (s *MySQLService) attach(ctx context.Context, input MySQLAttachInput) (string, error) {
 	// Validate input
 	if input.Name == "" || input.Database == "" || input.User == "" {
-		return unillm.NewTextErrorResponse("name, database, and user are required"), nil
+		return "", fmt.Errorf("name, database, and user are required")
 	}
 
 	// Validate that either host or socket is provided
 	if input.Socket == "" && input.Host == "" {
-		return unillm.NewTextErrorResponse("either host or socket must be provided"), nil
+		return "", fmt.Errorf("either host or socket must be provided")
 	}
 
 	// Validate identifiers for SQL injection protection
 	if err := validateSQLIdent(input.Name); err != nil {
-		return unillm.NewTextErrorResponse(err.Error()), nil
+		return "", err
 	}
 
 	// Check if already connected
 	if s.hasConnection(input.Name) {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("connection '%s' already exists", input.Name)), nil
+		return "", fmt.Errorf("connection '%s' already exists", input.Name)
 	}
 
 	// Default values
@@ -256,7 +250,7 @@ func (s *MySQLService) attach(ctx context.Context, input MySQLAttachInput) (unil
 	defer cancel()
 
 	if _, err := s.db.ExecContext(execCtx, attachCmd); err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to attach: %v", err)), nil
+		return "", fmt.Errorf("failed to attach: %v", err)
 	}
 
 	// Mark as connected
@@ -271,24 +265,24 @@ func (s *MySQLService) attach(ctx context.Context, input MySQLAttachInput) (unil
 	}
 
 	resultJSON, _ := json.Marshal(result)
-	return unillm.NewTextResponse(string(resultJSON)), nil
+	return string(resultJSON), nil
 }
 
 // query executes a SELECT query
-func (s *MySQLService) query(ctx context.Context, input MySQLQueryInput) (unillm.ToolResponse, error) {
+func (s *MySQLService) query(ctx context.Context, input MySQLQueryInput) (string, error) {
 	// Validate input
 	if input.Connection == "" || input.Query == "" {
-		return unillm.NewTextErrorResponse("connection and query are required"), nil
+		return "", fmt.Errorf("connection and query are required")
 	}
 
 	// Validate identifier
 	if err := validateSQLIdent(input.Connection); err != nil {
-		return unillm.NewTextErrorResponse(err.Error()), nil
+		return "", err
 	}
 
 	// Check connection exists
 	if !s.hasConnection(input.Connection) {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("connection '%s' not found. Use mysql_attach first.", input.Connection)), nil
+		return "", fmt.Errorf("connection '%s' not found. Use mysql_attach first.", input.Connection)
 	}
 
 	// Validate query is SELECT
@@ -299,7 +293,7 @@ func (s *MySQLService) query(ctx context.Context, input MySQLQueryInput) (unillm
 	// Strip leading CTEs and validate the actual query command
 	actualCommand := stripLeadingCTEs(queryUpper)
 	if !strings.HasPrefix(actualCommand, "SELECT") && !strings.HasPrefix(actualCommand, "SHOW") {
-		return unillm.NewTextErrorResponse("only SELECT/WITH/SHOW queries are allowed. Use mysql_execute for other commands."), nil
+		return "", fmt.Errorf("only SELECT/WITH/SHOW queries are allowed. Use mysql_execute for other commands.")
 	}
 
 	// Additional check: ensure no DML keywords appear in the query
@@ -307,7 +301,7 @@ func (s *MySQLService) query(ctx context.Context, input MySQLQueryInput) (unillm
 	dangerousKeywords := []string{"INSERT ", "UPDATE ", "DELETE ", "MERGE ", "DROP ", "ALTER ", "CREATE ", "TRUNCATE "}
 	for _, keyword := range dangerousKeywords {
 		if strings.Contains(queryUpper, keyword) {
-			return unillm.NewTextErrorResponse("only SELECT/WITH/SHOW queries are allowed. Use mysql_execute for other commands."), nil
+			return "", fmt.Errorf("only SELECT/WITH/SHOW queries are allowed. Use mysql_execute for other commands.")
 		}
 	}
 
@@ -331,14 +325,14 @@ func (s *MySQLService) query(ctx context.Context, input MySQLQueryInput) (unillm
 
 	rows, err := s.db.QueryContext(execCtx, query)
 	if err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("query failed: %v", err)), nil
+		return "", fmt.Errorf("query failed: %v", err)
 	}
 	defer rows.Close()
 
 	// Get column names
 	columns, err := rows.Columns()
 	if err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to get columns: %v", err)), nil
+		return "", fmt.Errorf("failed to get columns: %v", err)
 	}
 
 	// Fetch results
@@ -352,7 +346,7 @@ func (s *MySQLService) query(ctx context.Context, input MySQLQueryInput) (unillm
 		}
 
 		if err := rows.Scan(valuePtrs...); err != nil {
-			return unillm.NewTextErrorResponse(fmt.Sprintf("scan failed: %v", err)), nil
+			return "", fmt.Errorf("scan failed: %v", err)
 		}
 
 		// Build result map
@@ -370,7 +364,7 @@ func (s *MySQLService) query(ctx context.Context, input MySQLQueryInput) (unillm
 	}
 
 	if err := rows.Err(); err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("rows iteration error: %v", err)), nil
+		return "", fmt.Errorf("rows iteration error: %v", err)
 	}
 
 	response := map[string]interface{}{
@@ -381,24 +375,24 @@ func (s *MySQLService) query(ctx context.Context, input MySQLQueryInput) (unillm
 	}
 
 	resultJSON, _ := json.MarshalIndent(response, "", "  ")
-	return unillm.NewTextResponse(string(resultJSON)), nil
+	return string(resultJSON), nil
 }
 
 // execute runs DDL/DML commands
-func (s *MySQLService) execute(ctx context.Context, input MySQLExecuteInput) (unillm.ToolResponse, error) {
+func (s *MySQLService) execute(ctx context.Context, input MySQLExecuteInput) (string, error) {
 	// Validate input
 	if input.Connection == "" || input.Command == "" {
-		return unillm.NewTextErrorResponse("connection and command are required"), nil
+		return "", fmt.Errorf("connection and command are required")
 	}
 
 	// Validate identifier
 	if err := validateSQLIdent(input.Connection); err != nil {
-		return unillm.NewTextErrorResponse(err.Error()), nil
+		return "", err
 	}
 
 	// Check connection exists
 	if !s.hasConnection(input.Connection) {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("connection '%s' not found", input.Connection)), nil
+		return "", fmt.Errorf("connection '%s' not found", input.Connection)
 	}
 
 	// Check for dangerous operations
@@ -409,7 +403,7 @@ func (s *MySQLService) execute(ctx context.Context, input MySQLExecuteInput) (un
 		strings.Contains(cmdUpper, "TRUNCATE")
 
 	if isDangerous && !input.Confirm {
-		return unillm.NewTextErrorResponse("dangerous operation detected. Set confirm=true to proceed."), nil
+		return "", fmt.Errorf("dangerous operation detected. Set confirm=true to proceed.")
 	}
 
 	slog.InfoContext(ctx, "Executing MySQL command", "connection", input.Connection, "command", input.Command)
@@ -424,7 +418,7 @@ func (s *MySQLService) execute(ctx context.Context, input MySQLExecuteInput) (un
 
 	result, err := s.db.ExecContext(execCtx, execQuery)
 	if err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("execution failed: %v", err)), nil
+		return "", fmt.Errorf("execution failed: %v", err)
 	}
 
 	rowsAffected, _ := result.RowsAffected()
@@ -436,27 +430,27 @@ func (s *MySQLService) execute(ctx context.Context, input MySQLExecuteInput) (un
 	}
 
 	resultJSON, _ := json.Marshal(response)
-	return unillm.NewTextResponse(string(resultJSON)), nil
+	return string(resultJSON), nil
 }
 
 // listTables lists all tables in database
-func (s *MySQLService) listTables(ctx context.Context, input MySQLListTablesInput) (unillm.ToolResponse, error) {
+func (s *MySQLService) listTables(ctx context.Context, input MySQLListTablesInput) (string, error) {
 	if input.Connection == "" {
-		return unillm.NewTextErrorResponse("connection is required"), nil
+		return "", fmt.Errorf("connection is required")
 	}
 
 	// Validate identifiers
 	if err := validateSQLIdent(input.Connection); err != nil {
-		return unillm.NewTextErrorResponse(err.Error()), nil
+		return "", err
 	}
 	if input.Database != "" {
 		if err := validateSQLIdent(input.Database); err != nil {
-			return unillm.NewTextErrorResponse(err.Error()), nil
+			return "", err
 		}
 	}
 
 	if !s.hasConnection(input.Connection) {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("connection '%s' not found", input.Connection)), nil
+		return "", fmt.Errorf("connection '%s' not found", input.Connection)
 	}
 
 	// Use SHOW TABLES query
@@ -471,7 +465,7 @@ func (s *MySQLService) listTables(ctx context.Context, input MySQLListTablesInpu
 	)
 	rows, err := s.db.QueryContext(ctx, query)
 	if err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to list tables: %v", err)), nil
+		return "", fmt.Errorf("failed to list tables: %v", err)
 	}
 	defer rows.Close()
 
@@ -491,32 +485,32 @@ func (s *MySQLService) listTables(ctx context.Context, input MySQLListTablesInpu
 	}
 
 	resultJSON, _ := json.MarshalIndent(response, "", "  ")
-	return unillm.NewTextResponse(string(resultJSON)), nil
+	return string(resultJSON), nil
 }
 
 // describe describes table schema
-func (s *MySQLService) describe(ctx context.Context, input MySQLDescribeInput) (unillm.ToolResponse, error) {
+func (s *MySQLService) describe(ctx context.Context, input MySQLDescribeInput) (string, error) {
 	if input.Connection == "" || input.Table == "" {
-		return unillm.NewTextErrorResponse("connection and table are required"), nil
+		return "", fmt.Errorf("connection and table are required")
 	}
 
 	// Validate identifiers
 	if err := validateSQLIdent(input.Connection); err != nil {
-		return unillm.NewTextErrorResponse(err.Error()), nil
+		return "", err
 	}
 	if err := validateSQLIdent(input.Table); err != nil {
-		return unillm.NewTextErrorResponse(err.Error()), nil
+		return "", err
 	}
 	if err := validateSQLIdent(input.Database); err != nil {
-		return unillm.NewTextErrorResponse(err.Error()), nil
+		return "", err
 	}
 
 	if !s.hasConnection(input.Connection) {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("connection '%s' not found", input.Connection)), nil
+		return "", fmt.Errorf("connection '%s' not found", input.Connection)
 	}
 
 	query := fmt.Sprintf(`
-		SELECT 
+		SELECT
 			column_name,
 			data_type,
 			is_nullable,
@@ -530,7 +524,7 @@ func (s *MySQLService) describe(ctx context.Context, input MySQLDescribeInput) (
 
 	rows, err := s.db.QueryContext(ctx, query)
 	if err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to describe table: %v", err)), nil
+		return "", fmt.Errorf("failed to describe table: %v", err)
 	}
 	defer rows.Close()
 
@@ -566,27 +560,27 @@ func (s *MySQLService) describe(ctx context.Context, input MySQLDescribeInput) (
 	}
 
 	resultJSON, _ := json.MarshalIndent(response, "", "  ")
-	return unillm.NewTextResponse(string(resultJSON)), nil
+	return string(resultJSON), nil
 }
 
 // detach disconnects from MySQL
-func (s *MySQLService) detach(ctx context.Context, input MySQLDetachInput) (unillm.ToolResponse, error) {
+func (s *MySQLService) detach(ctx context.Context, input MySQLDetachInput) (string, error) {
 	if input.Connection == "" {
-		return unillm.NewTextErrorResponse("connection is required"), nil
+		return "", fmt.Errorf("connection is required")
 	}
 
 	// Validate identifier
 	if err := validateSQLIdent(input.Connection); err != nil {
-		return unillm.NewTextErrorResponse(err.Error()), nil
+		return "", err
 	}
 
 	if !s.hasConnection(input.Connection) {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("connection '%s' not found", input.Connection)), nil
+		return "", fmt.Errorf("connection '%s' not found", input.Connection)
 	}
 
 	detachCmd := fmt.Sprintf("DETACH %s", input.Connection)
 	if _, err := s.db.ExecContext(ctx, detachCmd); err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to detach: %v", err)), nil
+		return "", fmt.Errorf("failed to detach: %v", err)
 	}
 
 	s.setConnection(input.Connection, false)
@@ -597,5 +591,5 @@ func (s *MySQLService) detach(ctx context.Context, input MySQLDetachInput) (unil
 	}
 
 	resultJSON, _ := json.Marshal(result)
-	return unillm.NewTextResponse(string(resultJSON)), nil
+	return string(resultJSON), nil
 }

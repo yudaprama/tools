@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/getkawai/unillm"
-	"github.com/yudaprama/tools"
+	"github.com/cloudwego/eino/components/tool"
+	"github.com/cloudwego/eino/components/tool/utils"
 	"github.com/getkawai/database/db"
 )
 
@@ -81,22 +81,21 @@ func (s *ImageDescribeService) GetImageDescription(ctx context.Context, fileID s
 	return "", fmt.Errorf("timeout waiting for image description (file_id: %s)", fileID)
 }
 
-// RegisterImageDescribe registers the image describe tool
-func RegisterImageDescribe(registry *tools.ToolRegistry, sqlDB *sql.DB) error {
+// NewImageDescribe creates the image describe tool (requires a DB connection).
+func NewImageDescribe(_ context.Context, sqlDB *sql.DB) ([]tool.InvokableTool, error) {
 	service := NewImageDescribeService(sqlDB)
 
-	tool := unillm.NewParallelAgentTool("lobe-image-describe__getImageDescription",
+	imageDescribeTool, err := utils.InferTool("lobe-image-describe__getImageDescription",
 		"Get AI-generated description of an uploaded image or video. Use this when user asks about image content, text extraction, OCR, or visual analysis. The description is pre-generated when the file was uploaded.",
-		func(ctx context.Context, input ImageDescribeInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+		func(ctx context.Context, input *ImageDescribeInput) (string, error) {
 			if input.FileID == "" {
-				return unillm.NewTextErrorResponse("file_id parameter is required"), nil
+				return "", fmt.Errorf("file_id parameter is required")
 			}
 
-			// Wait up to 2 minutes for VL description
 			description, err := service.GetImageDescription(ctx, input.FileID, 2*time.Minute)
 			if err != nil {
 				log.Printf("⚠️  [ImageDescribe] Failed to get description: %v", err)
-				return unillm.NewTextErrorResponse(err.Error()), nil
+				return "", err
 			}
 
 			result := map[string]interface{}{
@@ -107,12 +106,15 @@ func RegisterImageDescribe(registry *tools.ToolRegistry, sqlDB *sql.DB) error {
 
 			resultJSON, err := json.Marshal(result)
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("failed to marshal result: %v", err)), nil
+				return "", fmt.Errorf("failed to marshal result: %v", err)
 			}
 
-			return unillm.NewTextResponse(string(resultJSON)), nil
+			return string(resultJSON), nil
 		},
 	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to infer getImageDescription tool: %w", err)
+	}
 
-	return registry.Register(tool)
+	return []tool.InvokableTool{imageDescribeTool}, nil
 }

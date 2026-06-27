@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/getkawai/unillm"
+	"github.com/cloudwego/eino/schema"
 )
 
-// argsToJSON converts map[string]string to JSON string
+// argsToJSON converts map[string]string to JSON string.
 func argsToJSON(args map[string]string) string {
 	if args == nil {
 		return "{}"
@@ -21,14 +21,14 @@ func argsToJSON(args map[string]string) string {
 	return string(b)
 }
 
-// ParseToolCalls parses tool calls from LLM response
-// Supports multiple formats:
-// 1. <tool_call>{"name": "...", "arguments": {...}}</tool_call>
-// 2. <tool_name>JSON</tool_name> or <tool_name attr="value">content</tool_name>
-// 3. <tool_name {JSON}> or <tool_name {"key": "value"}> (no closing tag)
-// 4. {"name": "tool_name", "parameters": {...}} (pure JSON format)
-func ParseToolCalls(response string) []unillm.ToolCall {
-	var calls []unillm.ToolCall
+// ParseToolCalls parses tool calls from an LLM response (for models without
+// native function-calling). Supports multiple formats:
+//  1. <tool_call>{"name": "...", "arguments": {...}}</tool_call>
+//  2. <tool_name>JSON</tool_name> or <tool_name attr="value">content</tool_name>
+//  3. <tool_name {JSON}> or <tool_name {"key": "value"}> (no closing tag)
+//  4. {"name": "tool_name", "parameters": {...}} (pure JSON format)
+func ParseToolCalls(response string) []schema.ToolCall {
+	var calls []schema.ToolCall
 
 	// Try format 1: <tool_call>{"name": "...", "arguments": {...}}</tool_call>
 	calls = parseToolCallFormat(response)
@@ -53,9 +53,9 @@ func ParseToolCalls(response string) []unillm.ToolCall {
 	return calls
 }
 
-// parsePureJSONToolFormat parses pure JSON tool call format
-func parsePureJSONToolFormat(response string) []unillm.ToolCall {
-	var calls []unillm.ToolCall
+// parsePureJSONToolFormat parses pure JSON tool call format.
+func parsePureJSONToolFormat(response string) []schema.ToolCall {
+	var calls []schema.ToolCall
 	toolNames := []string{"calculator", "web_search", "web-search", "search"}
 	remaining := strings.TrimSpace(response)
 
@@ -112,11 +112,7 @@ func parsePureJSONToolFormat(response string) []unillm.ToolCall {
 					}
 
 					if len(args) > 0 {
-						calls = append(calls, unillm.ToolCall{
-							ID:    uuid.New().String(),
-							Name:  toolCall.Name,
-							Input: argsToJSON(args),
-						})
+						calls = append(calls, newToolCall(toolCall.Name, argsToJSON(args)))
 					}
 				}
 			}
@@ -126,9 +122,9 @@ func parsePureJSONToolFormat(response string) []unillm.ToolCall {
 	return calls
 }
 
-// parseInlineJSONToolFormat parses <tool_name {JSON}> format (no closing tag)
-func parseInlineJSONToolFormat(response string) []unillm.ToolCall {
-	var calls []unillm.ToolCall
+// parseInlineJSONToolFormat parses <tool_name {JSON}> format (no closing tag).
+func parseInlineJSONToolFormat(response string) []schema.ToolCall {
+	var calls []schema.ToolCall
 	toolNames := []string{"calculator", "web_search", "web-search", "search"}
 
 	for _, toolName := range toolNames {
@@ -188,11 +184,7 @@ func parseInlineJSONToolFormat(response string) []unillm.ToolCall {
 			}
 
 			if len(args) > 0 {
-				calls = append(calls, unillm.ToolCall{
-					ID:    uuid.New().String(),
-					Name:  toolName,
-					Input: argsToJSON(args),
-				})
+				calls = append(calls, newToolCall(toolName, argsToJSON(args)))
 			}
 
 			remaining = remaining[openTagStart+len("<"+toolName)+jsonEnd:]
@@ -203,14 +195,9 @@ func parseInlineJSONToolFormat(response string) []unillm.ToolCall {
 }
 
 // parseToolCallFormat parses <tool_call> tags using robust brace-counting extraction.
-// This correctly handles:
-// - Multiple tool calls in one response
-// - Nested JSON objects like {"a": {"b": 1}}
-// - Edge cases where </tool_call> appears inside JSON strings
-func parseToolCallFormat(response string) []unillm.ToolCall {
-	var calls []unillm.ToolCall
+func parseToolCallFormat(response string) []schema.ToolCall {
+	var calls []schema.ToolCall
 
-	// Use the robust extraction that handles nested JSON and edge cases
 	blocks := ExtractToolCallBlocks(response)
 
 	for _, block := range blocks {
@@ -220,7 +207,6 @@ func parseToolCallFormat(response string) []unillm.ToolCall {
 		}
 
 		if err := json.Unmarshal([]byte(block.JSONContent), &parsed); err == nil && parsed.Name != "" {
-			// Convert arguments to map[string]string for compatibility
 			args := make(map[string]string)
 			for k, v := range parsed.Arguments {
 				switch val := v.(type) {
@@ -233,7 +219,6 @@ func parseToolCallFormat(response string) []unillm.ToolCall {
 				case bool:
 					args[k] = fmt.Sprintf("%v", val)
 				default:
-					// For complex types (nested objects/arrays), marshal back to JSON
 					if b, err := json.Marshal(val); err == nil {
 						args[k] = string(b)
 					} else {
@@ -242,20 +227,16 @@ func parseToolCallFormat(response string) []unillm.ToolCall {
 				}
 			}
 
-			calls = append(calls, unillm.ToolCall{
-				ID:    uuid.New().String(),
-				Name:  parsed.Name,
-				Input: argsToJSON(args),
-			})
+			calls = append(calls, newToolCall(parsed.Name, argsToJSON(args)))
 		}
 	}
 
 	return calls
 }
 
-// parseXMLToolFormat parses <tool_name>...</tool_name> tags
-func parseXMLToolFormat(response string) []unillm.ToolCall {
-	var calls []unillm.ToolCall
+// parseXMLToolFormat parses <tool_name>...</tool_name> tags.
+func parseXMLToolFormat(response string) []schema.ToolCall {
+	var calls []schema.ToolCall
 	toolNames := []string{"calculator", "web_search", "web-search", "search"}
 
 	for _, toolName := range toolNames {
@@ -290,11 +271,7 @@ func parseXMLToolFormat(response string) []unillm.ToolCall {
 			}
 
 			if err := json.Unmarshal([]byte(content), &parsed); err == nil {
-				calls = append(calls, unillm.ToolCall{
-					ID:    uuid.New().String(),
-					Name:  parsed.Name,
-					Input: argsToJSON(parsed.Arguments),
-				})
+				calls = append(calls, newToolCall(parsed.Name, argsToJSON(parsed.Arguments)))
 			} else {
 				args := parseTagAttributes(fullOpenTag, toolName)
 
@@ -316,11 +293,7 @@ func parseXMLToolFormat(response string) []unillm.ToolCall {
 				}
 
 				if len(args) > 0 {
-					calls = append(calls, unillm.ToolCall{
-						ID:    uuid.New().String(),
-						Name:  toolName,
-						Input: argsToJSON(args),
-					})
+					calls = append(calls, newToolCall(toolName, argsToJSON(args)))
 				}
 			}
 
@@ -331,7 +304,19 @@ func parseXMLToolFormat(response string) []unillm.ToolCall {
 	return calls
 }
 
-// parseTagAttributes extracts attributes from XML-like opening tag
+// newToolCall builds a schema.ToolCall with a generated id and "function" type.
+func newToolCall(name, argumentsJSON string) schema.ToolCall {
+	return schema.ToolCall{
+		ID:   uuid.New().String(),
+		Type: "function",
+		Function: schema.FunctionCall{
+			Name:      name,
+			Arguments: argumentsJSON,
+		},
+	}
+}
+
+// parseTagAttributes extracts attributes from an XML-like opening tag.
 func parseTagAttributes(tag string, toolName string) map[string]string {
 	args := make(map[string]string)
 
@@ -387,7 +372,7 @@ func parseTagAttributes(tag string, toolName string) map[string]string {
 	return args
 }
 
-// FormatToolsJSON formats tool definitions as JSON string
+// FormatToolsJSON formats tool definitions as a JSON string.
 func FormatToolsJSON(toolDefs []map[string]any) string {
 	if len(toolDefs) == 0 {
 		return ""
@@ -400,7 +385,7 @@ func FormatToolsJSON(toolDefs []map[string]any) string {
 	return string(toolsJSON)
 }
 
-// BuildSystemPrompt builds a system prompt with tool definitions
+// BuildSystemPrompt builds a system prompt with tool definitions.
 func BuildSystemPrompt(basePrompt string, toolsJSON string) string {
 	if toolsJSON == "" {
 		return basePrompt

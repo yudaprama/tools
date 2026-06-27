@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/getkawai/unillm"
+	"github.com/cloudwego/eino/components/tool/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -17,6 +17,7 @@ func TestOfficeWord(t *testing.T) {
 	defer os.RemoveAll(tmpDir)
 
 	filename := filepath.ToSlash(filepath.Join(tmpDir, "test.docx"))
+	ctx := context.Background()
 
 	// 1. Create
 	createInput := `
@@ -32,17 +33,17 @@ func TestOfficeWord(t *testing.T) {
 			}
 		]
 	}`
-	createTool := unillm.NewAgentTool("office-word__create", "desc", CreateWord)
-	resp, err := createTool.Run(context.Background(), unillm.ToolCall{Input: createInput})
+	createTool, err := utils.InferTool("office-word__create", "desc", CreateWord)
 	require.NoError(t, err)
-	assert.False(t, resp.IsError, resp.Content)
+	content, err := createTool.InvokableRun(ctx, createInput)
+	require.NoError(t, err, content)
 
 	// 2. Read
-	readTool := unillm.NewAgentTool("office-word__read", "desc", ReadWord)
-	resp, err = readTool.Run(context.Background(), unillm.ToolCall{Input: `{"filename": "` + filename + `"}`})
+	readTool, err := utils.InferTool("office-word__read", "desc", ReadWord)
 	require.NoError(t, err)
-	assert.False(t, resp.IsError)
-	assert.Contains(t, resp.Content, "Hello World")
+	content, err = readTool.InvokableRun(ctx, `{"filename": "`+filename+`"}`)
+	require.NoError(t, err)
+	assert.Contains(t, content, "Hello World")
 
 	// 3. Update
 	updateInput := `
@@ -57,15 +58,15 @@ func TestOfficeWord(t *testing.T) {
 			}
 		]
 	}`
-	updateTool := unillm.NewAgentTool("office-word__update", "desc", UpdateWord)
-	resp, err = updateTool.Run(context.Background(), unillm.ToolCall{Input: updateInput})
+	updateTool, err := utils.InferTool("office-word__update", "desc", UpdateWord)
 	require.NoError(t, err)
-	assert.False(t, resp.IsError)
+	_, err = updateTool.InvokableRun(ctx, updateInput)
+	require.NoError(t, err)
 
 	// 4. Read Loop
-	resp, err = readTool.Run(context.Background(), unillm.ToolCall{Input: `{"filename": "` + filename + `"}`})
+	content, err = readTool.InvokableRun(ctx, `{"filename": "`+filename+`"}`)
 	require.NoError(t, err)
-	assert.Contains(t, resp.Content, "Appended Text")
+	assert.Contains(t, content, "Appended Text")
 }
 
 func TestOfficeExcel(t *testing.T) {
@@ -74,31 +75,33 @@ func TestOfficeExcel(t *testing.T) {
 	defer os.RemoveAll(tmpDir)
 
 	filename := filepath.ToSlash(filepath.Join(tmpDir, "test.xlsx"))
+	ctx := context.Background()
 
 	// 1. Create
-	createTool := unillm.NewAgentTool("office-excel__create", "desc", CreateExcel)
-	input := `{"filename": "` + filename + `", "rows": [{"cells": ["A1", "B1"]}]}`
-	resp, err := createTool.Run(context.Background(), unillm.ToolCall{Input: input})
+	createTool, err := utils.InferTool("office-excel__create", "desc", CreateExcel)
 	require.NoError(t, err)
-	assert.False(t, resp.IsError)
+	input := `{"filename": "` + filename + `", "rows": [{"cells": ["A1", "B1"]}]}`
+	content, err := createTool.InvokableRun(ctx, input)
+	require.NoError(t, err, content)
 
 	// 2. Read
-	readTool := unillm.NewAgentTool("office-excel__read", "desc", ReadExcel)
-	resp, err = readTool.Run(context.Background(), unillm.ToolCall{Input: `{"filename": "` + filename + `"}`})
+	readTool, err := utils.InferTool("office-excel__read", "desc", ReadExcel)
 	require.NoError(t, err)
-	assert.Contains(t, resp.Content, "| A1 | B1 |")
+	content, err = readTool.InvokableRun(ctx, `{"filename": "`+filename+`"}`)
+	require.NoError(t, err)
+	assert.Contains(t, content, "| A1 | B1 |")
 
 	// 3. Update
-	updateTool := unillm.NewAgentTool("office-excel__update", "desc", UpdateExcel)
-	input = `{"filename": "` + filename + `", "rows": [{"cells": ["A2", "B2"]}]}`
-	resp, err = updateTool.Run(context.Background(), unillm.ToolCall{Input: input})
+	updateTool, err := utils.InferTool("office-excel__update", "desc", UpdateExcel)
 	require.NoError(t, err)
-	assert.False(t, resp.IsError)
+	input = `{"filename": "` + filename + `", "rows": [{"cells": ["A2", "B2"]}]}`
+	_, err = updateTool.InvokableRun(ctx, input)
+	require.NoError(t, err)
 
 	// 4. Read Loop
-	resp, err = readTool.Run(context.Background(), unillm.ToolCall{Input: `{"filename": "` + filename + `"}`})
+	content, err = readTool.InvokableRun(ctx, `{"filename": "`+filename+`"}`)
 	require.NoError(t, err)
-	assert.Contains(t, resp.Content, "| A2 | B2 |")
+	assert.Contains(t, content, "| A2 | B2 |")
 }
 
 func TestOfficePowerPoint(t *testing.T) {
@@ -107,24 +110,26 @@ func TestOfficePowerPoint(t *testing.T) {
 	defer os.RemoveAll(tmpDir)
 
 	filename := filepath.ToSlash(filepath.Join(tmpDir, "test.pptx"))
+	ctx := context.Background()
 
 	// 1. Create
-	createTool := unillm.NewAgentTool("office-powerpoint__create", "desc", CreatePowerPoint)
-	input := `{"filename": "` + filename + `", "slides": [{"title": "Slide 1"}]}`
-	resp, err := createTool.Run(context.Background(), unillm.ToolCall{Input: input})
+	createTool, err := utils.InferTool("office-powerpoint__create", "desc", CreatePowerPoint)
 	require.NoError(t, err)
-	assert.False(t, resp.IsError)
+	input := `{"filename": "` + filename + `", "slides": [{"title": "Slide 1"}]}`
+	content, err := createTool.InvokableRun(ctx, input)
+	require.NoError(t, err, content)
 
 	// 2. Read
-	readTool := unillm.NewAgentTool("office-powerpoint__read", "desc", ReadPowerPoint)
-	resp, err = readTool.Run(context.Background(), unillm.ToolCall{Input: `{"filename": "` + filename + `"}`})
+	readTool, err := utils.InferTool("office-powerpoint__read", "desc", ReadPowerPoint)
 	require.NoError(t, err)
-	assert.Contains(t, resp.Content, "Slide 1")
+	content, err = readTool.InvokableRun(ctx, `{"filename": "`+filename+`"}`)
+	require.NoError(t, err)
+	assert.Contains(t, content, "Slide 1")
 
 	// 3. Update
-	updateTool := unillm.NewAgentTool("office-powerpoint__update", "desc", UpdatePowerPoint)
-	input = `{"filename": "` + filename + `", "slides": [{"title": "Slide 2"}]}`
-	resp, err = updateTool.Run(context.Background(), unillm.ToolCall{Input: input})
+	updateTool, err := utils.InferTool("office-powerpoint__update", "desc", UpdatePowerPoint)
 	require.NoError(t, err)
-	assert.False(t, resp.IsError)
+	input = `{"filename": "` + filename + `", "slides": [{"title": "Slide 2"}]}`
+	_, err = updateTool.InvokableRun(ctx, input)
+	require.NoError(t, err)
 }

@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/getkawai/unillm"
-	"github.com/yudaprama/tools"
+	"github.com/cloudwego/eino/components/tool"
+	"github.com/cloudwego/eino/components/tool/utils"
 	"github.com/yudaprama/tools/gooxml/color"
 	"github.com/yudaprama/tools/gooxml/document"
 	"github.com/yudaprama/tools/gooxml/measurement"
@@ -172,72 +172,76 @@ func appendWordElements(doc *document.Document, elements []WordElement) {
 // -- Executors --
 
 // CreateWord creates a new Word document.
-func CreateWord(ctx context.Context, input CreateWordInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+func CreateWord(ctx context.Context, input *CreateWordInput) (string, error) {
 	doc := document.New()
 	appendWordElements(doc, input.Elements)
 
 	if err := doc.SaveToFile(input.Filename); err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to save docx: %v", err)), nil
+		return "", fmt.Errorf("failed to save docx: %v", err)
 	}
-	return unillm.NewTextResponse(fmt.Sprintf("Word document created successfully at %s", input.Filename)), nil
+	return fmt.Sprintf("Word document created successfully at %s", input.Filename), nil
 }
 
 // UpdateWord updates an existing Word document.
-func UpdateWord(ctx context.Context, input UpdateWordInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+func UpdateWord(ctx context.Context, input *UpdateWordInput) (string, error) {
 	doc, err := document.Open(input.Filename)
 	if err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to open docx: %v", err)), nil
+		return "", fmt.Errorf("failed to open docx: %v", err)
 	}
 
 	appendWordElements(doc, input.Elements)
 
 	if err := doc.SaveToFile(input.Filename); err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to save updated docx: %v", err)), nil
+		return "", fmt.Errorf("failed to save updated docx: %v", err)
 	}
-	return unillm.NewTextResponse(fmt.Sprintf("Word document updated successfully at %s", input.Filename)), nil
+	return fmt.Sprintf("Word document updated successfully at %s", input.Filename), nil
 }
 
 // ReadWord reads content from a Word document.
-func ReadWord(ctx context.Context, input ReadWordInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+func ReadWord(ctx context.Context, input *ReadWordInput) (string, error) {
 	doc, err := document.Open(input.Filename)
 	if err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to open docx: %v", err)), nil
+		return "", fmt.Errorf("failed to open docx: %v", err)
 	}
 
 	markdown, err := doc.ToMarkdownWithImageURLs("")
 	if err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to convert to markdown: %v", err)), nil
+		return "", fmt.Errorf("failed to convert to markdown: %v", err)
 	}
 
-	return unillm.NewTextResponse(markdown), nil
+	return markdown, nil
 }
 
 // -- Registration --
 
-// RegisterOfficeWord registers the Word tools.
-func RegisterOfficeWord(registry *tools.ToolRegistry) error {
-	createTool := unillm.NewAgentTool(
+// NewOfficeWord registers the Word tools.
+func NewOfficeWord(ctx context.Context) ([]tool.InvokableTool, error) {
+	createTool, err := utils.InferTool(
 		"office-word__create",
 		"Create a standard Word document (.docx). Supports rich text (bold, italic, color) and tables.",
 		CreateWord,
 	)
-	if err := registry.Register(createTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	updateTool := unillm.NewAgentTool(
+	updateTool, err := utils.InferTool(
 		"office-word__update",
 		"Update an existing Word document by appending paragraphs or tables to the end.",
 		UpdateWord,
 	)
-	if err := registry.Register(updateTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	readTool := unillm.NewAgentTool(
+	readTool, err := utils.InferTool(
 		"office-word__read",
 		"Read text content from a Word document, including paragraphs and tables.",
 		ReadWord,
 	)
-	return registry.Register(readTool)
+	if err != nil {
+		return nil, err
+	}
+
+	return []tool.InvokableTool{createTool, updateTool, readTool}, nil
 }

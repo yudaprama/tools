@@ -5,63 +5,85 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/getkawai/unillm"
+	jsonschema "github.com/eino-contrib/jsonschema"
+	"github.com/cloudwego/eino/components/tool"
+	"github.com/cloudwego/eino/schema"
 )
 
-// ToolExecutor is a function that executes a tool with string arguments
+// ToolExecutor executes a tool with string-keyed arguments.
 type ToolExecutor func(ctx context.Context, args map[string]string) (string, error)
 
-// SimpleTool is a simple implementation of unillm.AgentTool
+// SimpleTool is a simple implementation of tool.InvokableTool backed by an
+// explicit ToolExecutor and a JSON-Schema parameter map.
 type SimpleTool struct {
-	name            string
-	description     string
-	parameters      map[string]any
-	required        []string
-	parallel        bool
-	executor        ToolExecutor
-	providerOptions unillm.ProviderOptions
+	name        string
+	description string
+	paramsOneOf *schema.ParamsOneOf
+	executor    ToolExecutor
 }
 
-// SimpleToolConfig configures a SimpleTool
+// SimpleToolConfig configures a SimpleTool.
 type SimpleToolConfig struct {
 	Name        string
 	Description string
-	Parameters  map[string]any // JSON Schema properties
+	Parameters  map[string]any // JSON Schema "properties"-like object
 	Required    []string
-	Parallel    bool
 	Executor    ToolExecutor
 }
 
-// NewSimpleTool creates a new SimpleTool from config
-func NewSimpleTool(cfg SimpleToolConfig) *SimpleTool {
-	return &SimpleTool{
+// NewSimpleTool creates a new SimpleTool from config.
+func NewSimpleTool(cfg SimpleToolConfig) (*SimpleTool, error) {
+	if cfg.Name == "" {
+		return nil, fmt.Errorf("tool name is required")
+	}
+	if cfg.Executor == nil {
+		return nil, fmt.Errorf("executor is required")
+	}
+
+	t := &SimpleTool{
 		name:        cfg.Name,
 		description: cfg.Description,
-		parameters:  cfg.Parameters,
-		required:    cfg.Required,
-		parallel:    cfg.Parallel,
 		executor:    cfg.Executor,
 	}
-}
 
-// Info returns tool metadata
-func (t *SimpleTool) Info() unillm.ToolInfo {
-	return unillm.ToolInfo{
-		Name:        t.name,
-		Description: t.description,
-		Parameters:  t.parameters,
-		Required:    t.required,
-		Parallel:    t.parallel,
+	if cfg.Parameters != nil {
+		js := &jsonschema.Schema{
+			Type:       "object",
+			Properties: jsonschema.NewProperties(),
+			Required:   cfg.Required,
+		}
+		for propName, propVal := range cfg.Parameters {
+			raw, err := json.Marshal(propVal)
+			if err != nil {
+				return nil, fmt.Errorf("failed to encode parameter %q: %w", propName, err)
+			}
+			var ps jsonschema.Schema
+			if err := json.Unmarshal(raw, &ps); err != nil {
+				return nil, fmt.Errorf("failed to decode parameter %q: %w", propName, err)
+			}
+			js.Properties.Set(propName, &ps)
+		}
+		t.paramsOneOf = schema.NewParamsOneOfByJSONSchema(js)
 	}
+
+	return t, nil
 }
 
-// Run executes the tool
-func (t *SimpleTool) Run(ctx context.Context, call unillm.ToolCall) (unillm.ToolResponse, error) {
-	// Parse input JSON to map[string]string
+// Info returns tool metadata.
+func (t *SimpleTool) Info(_ context.Context) (*schema.ToolInfo, error) {
+	return &schema.ToolInfo{
+		Name:        t.name,
+		Desc:        t.description,
+		ParamsOneOf: t.paramsOneOf,
+	}, nil
+}
+
+// InvokableRun executes the tool with a JSON-encoded arguments string.
+func (t *SimpleTool) InvokableRun(ctx context.Context, argumentsInJSON string, _ ...tool.Option) (string, error) {
 	args := make(map[string]string)
-	if call.Input != "" {
+	if argumentsInJSON != "" {
 		var argsAny map[string]interface{}
-		if err := json.Unmarshal([]byte(call.Input), &argsAny); err == nil {
+		if err := json.Unmarshal([]byte(argumentsInJSON), &argsAny); err == nil {
 			for k, v := range argsAny {
 				switch val := v.(type) {
 				case string:
@@ -75,7 +97,6 @@ func (t *SimpleTool) Run(ctx context.Context, call unillm.ToolCall) (unillm.Tool
 						args[k] = "false"
 					}
 				default:
-					// For complex types, marshal back to JSON
 					if jsonBytes, err := json.Marshal(v); err == nil {
 						args[k] = string(jsonBytes)
 					}
@@ -84,26 +105,14 @@ func (t *SimpleTool) Run(ctx context.Context, call unillm.ToolCall) (unillm.Tool
 		}
 	}
 
-	// Execute the tool
 	result, err := t.executor(ctx, args)
 	if err != nil {
-		return unillm.NewTextErrorResponse(err.Error()), nil
+		return "", err
 	}
-
-	return unillm.NewTextResponse(result), nil
+	return result, nil
 }
 
-// ProviderOptions returns provider-specific options
-func (t *SimpleTool) ProviderOptions() unillm.ProviderOptions {
-	return t.providerOptions
-}
-
-// SetProviderOptions sets provider-specific options
-func (t *SimpleTool) SetProviderOptions(opts unillm.ProviderOptions) {
-	t.providerOptions = opts
-}
-
-// formatNumber converts float64 to string without scientific notation for integers
+// formatNumber converts float64 to string without scientific notation for integers.
 func formatNumber(f float64) string {
 	if f == float64(int64(f)) {
 		return fmt.Sprintf("%d", int64(f))

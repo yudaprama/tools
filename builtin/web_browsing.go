@@ -7,8 +7,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/getkawai/unillm"
-	"github.com/yudaprama/tools"
+	"github.com/cloudwego/eino/components/tool"
+	"github.com/cloudwego/eino/components/tool/utils"
 	"github.com/yudaprama/tools/search"
 )
 
@@ -154,16 +154,15 @@ func (s *WebBrowsingService) CrawlMultiPages(urls []string) (*CrawlPluginState, 
 // Tool Registration
 // ============================================================================
 
-// RegisterWebBrowsing registers the lobe-web-browsing tools (search, crawlSinglePage, crawlMultiPages)
-func RegisterWebBrowsing(registry *tools.ToolRegistry) error {
+// NewWebBrowsing creates the lobe-web-browsing tools (search, crawlSinglePage, crawlMultiPages).
+func NewWebBrowsing(_ context.Context) ([]tool.InvokableTool, error) {
 	service := NewWebBrowsingService()
 
-	// Tool 1: search
-	searchTool := unillm.NewParallelAgentTool("lobe-web-browsing__search",
+	searchTool, err := utils.InferTool("lobe-web-browsing__search",
 		"Search the web for information. Returns a list of search results with title, content, and URL.",
-		func(ctx context.Context, input WebBrowsingSearchInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+		func(ctx context.Context, input *WebBrowsingSearchInput) (string, error) {
 			if input.Query == "" {
-				return unillm.NewTextErrorResponse("query is required"), nil
+				return "", fmt.Errorf("query is required")
 			}
 
 			timeRange := input.SearchTimeRange
@@ -173,76 +172,71 @@ func RegisterWebBrowsing(registry *tools.ToolRegistry) error {
 
 			response, err := service.Search(input.Query, input.SearchCategories, input.SearchEngines, timeRange)
 			if err != nil {
-				return unillm.NewTextErrorResponse(err.Error()), nil
+				return "", err
 			}
 
 			resultJSON, err := json.Marshal(response)
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("failed to marshal response: %v", err)), nil
+				return "", fmt.Errorf("failed to marshal response: %v", err)
 			}
 
 			log.Printf("🔍 Web search completed: query=%s, results=%d", input.Query, len(response.Results))
-			return unillm.NewTextResponse(string(resultJSON)), nil
+			return string(resultJSON), nil
 		},
 	)
-
-	if err := registry.Register(searchTool); err != nil {
-		return fmt.Errorf("failed to register search tool: %w", err)
+	if err != nil {
+		return nil, fmt.Errorf("failed to infer search tool: %w", err)
 	}
 
-	// Tool 2: crawlSinglePage
-	crawlSingleTool := unillm.NewParallelAgentTool("lobe-web-browsing__crawlSinglePage",
+	crawlSingleTool, err := utils.InferTool("lobe-web-browsing__crawlSinglePage",
 		"Retrieve content from a specific webpage. Returns the page title, content, URL and website.",
-		func(ctx context.Context, input CrawlSingleInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+		func(ctx context.Context, input *CrawlSingleInput) (string, error) {
 			if input.URL == "" {
-				return unillm.NewTextErrorResponse("url is required"), nil
+				return "", fmt.Errorf("url is required")
 			}
 
 			response, err := service.CrawlSinglePage(input.URL)
 			if err != nil {
-				return unillm.NewTextErrorResponse(err.Error()), nil
+				return "", err
 			}
 
 			resultJSON, err := json.Marshal(response)
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("failed to marshal response: %v", err)), nil
+				return "", fmt.Errorf("failed to marshal response: %v", err)
 			}
 
 			log.Printf("🌐 Crawled single page: url=%s", input.URL)
-			return unillm.NewTextResponse(string(resultJSON)), nil
+			return string(resultJSON), nil
 		},
 	)
-
-	if err := registry.Register(crawlSingleTool); err != nil {
-		return fmt.Errorf("failed to register crawlSinglePage tool: %w", err)
+	if err != nil {
+		return nil, fmt.Errorf("failed to infer crawlSinglePage tool: %w", err)
 	}
 
-	// Tool 3: crawlMultiPages
-	crawlMultiTool := unillm.NewParallelAgentTool("lobe-web-browsing__crawlMultiPages",
+	crawlMultiTool, err := utils.InferTool("lobe-web-browsing__crawlMultiPages",
 		"Retrieve content from multiple webpages simultaneously. Returns an array of page results.",
-		func(ctx context.Context, input CrawlMultiInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+		func(ctx context.Context, input *CrawlMultiInput) (string, error) {
 			if len(input.URLs) == 0 {
-				return unillm.NewTextErrorResponse("at least one URL is required"), nil
+				return "", fmt.Errorf("at least one URL is required")
 			}
 
 			response, err := service.CrawlMultiPages(input.URLs)
 			if err != nil {
-				return unillm.NewTextErrorResponse(err.Error()), nil
+				return "", err
 			}
 
 			resultJSON, err := json.Marshal(response)
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("failed to marshal response: %v", err)), nil
+				return "", fmt.Errorf("failed to marshal response: %v", err)
 			}
 
 			log.Printf("🌐 Crawled %d pages", len(input.URLs))
-			return unillm.NewTextResponse(string(resultJSON)), nil
+			return string(resultJSON), nil
 		},
 	)
-
-	if err := registry.Register(crawlMultiTool); err != nil {
-		return fmt.Errorf("failed to register crawlMultiPages tool: %w", err)
+	if err != nil {
+		return nil, fmt.Errorf("failed to infer crawlMultiPages tool: %w", err)
 	}
 
-	return nil
+	return []tool.InvokableTool{searchTool, crawlSingleTool, crawlMultiTool}, nil
 }

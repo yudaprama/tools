@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/getkawai/unillm"
-	"github.com/yudaprama/tools"
+	"github.com/cloudwego/eino/components/tool"
+	"github.com/cloudwego/eino/components/tool/utils"
 	"github.com/yudaprama/tools/gooxml/measurement"
 	"github.com/yudaprama/tools/gooxml/presentation"
 )
@@ -72,72 +72,76 @@ func addSlidesToPres(ppt *presentation.Presentation, slides []PowerPointSlide) {
 // -- Executors --
 
 // CreatePowerPoint creates a new PowerPoint presentation.
-func CreatePowerPoint(ctx context.Context, input CreatePowerPointInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+func CreatePowerPoint(ctx context.Context, input *CreatePowerPointInput) (string, error) {
 	ppt := presentation.New()
 	addSlidesToPres(ppt, input.Slides)
 
 	if err := ppt.SaveToFile(input.Filename); err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to save pptx: %v", err)), nil
+		return "", fmt.Errorf("failed to save pptx: %v", err)
 	}
-	return unillm.NewTextResponse(fmt.Sprintf("PowerPoint presentation created successfully at %s", input.Filename)), nil
+	return fmt.Sprintf("PowerPoint presentation created successfully at %s", input.Filename), nil
 }
 
 // UpdatePowerPoint creates a new PowerPoint presentation.
-func UpdatePowerPoint(ctx context.Context, input UpdatePowerPointInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+func UpdatePowerPoint(ctx context.Context, input *UpdatePowerPointInput) (string, error) {
 	ppt, err := presentation.Open(input.Filename)
 	if err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to open pptx: %v", err)), nil
+		return "", fmt.Errorf("failed to open pptx: %v", err)
 	}
 
 	addSlidesToPres(ppt, input.Slides)
 
 	if err := ppt.SaveToFile(input.Filename); err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to save updated pptx: %v", err)), nil
+		return "", fmt.Errorf("failed to save updated pptx: %v", err)
 	}
-	return unillm.NewTextResponse(fmt.Sprintf("PowerPoint presentation updated successfully at %s", input.Filename)), nil
+	return fmt.Sprintf("PowerPoint presentation updated successfully at %s", input.Filename), nil
 }
 
 // ReadPowerPoint reads content from a PowerPoint presentation.
-func ReadPowerPoint(ctx context.Context, input ReadPowerPointInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+func ReadPowerPoint(ctx context.Context, input *ReadPowerPointInput) (string, error) {
 	ppt, err := presentation.Open(input.Filename)
 	if err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to open pptx: %v", err)), nil
+		return "", fmt.Errorf("failed to open pptx: %v", err)
 	}
 
 	markdown, err := ppt.ToMarkdownWithImageURLs("")
 	if err != nil {
-		return unillm.NewTextErrorResponse(fmt.Sprintf("failed to convert to markdown: %v", err)), nil
+		return "", fmt.Errorf("failed to convert to markdown: %v", err)
 	}
 
-	return unillm.NewTextResponse(markdown), nil
+	return markdown, nil
 }
 
 // -- Registration --
 
-// RegisterOfficePowerPoint registers the PowerPoint tools.
-func RegisterOfficePowerPoint(registry *tools.ToolRegistry) error {
-	createTool := unillm.NewAgentTool(
+// NewOfficePowerPoint registers the PowerPoint tools.
+func NewOfficePowerPoint(ctx context.Context) ([]tool.InvokableTool, error) {
+	createTool, err := utils.InferTool(
 		"office-powerpoint__create",
 		"Create a standard Presentation (.pptx).",
 		CreatePowerPoint,
 	)
-	if err := registry.Register(createTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	updateTool := unillm.NewAgentTool(
+	updateTool, err := utils.InferTool(
 		"office-powerpoint__update",
 		"Update an existing Presentation by appending slides.",
 		UpdatePowerPoint,
 	)
-	if err := registry.Register(updateTool); err != nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
-	readTool := unillm.NewAgentTool(
+	readTool, err := utils.InferTool(
 		"office-powerpoint__read",
 		"Read text content from a Presentation.",
 		ReadPowerPoint,
 	)
-	return registry.Register(readTool)
+	if err != nil {
+		return nil, err
+	}
+
+	return []tool.InvokableTool{createTool, updateTool, readTool}, nil
 }

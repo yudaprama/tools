@@ -11,10 +11,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yudaprama/tools"
-	"github.com/yudaprama/tools/image"
+	"github.com/cloudwego/eino/components/tool"
+	"github.com/cloudwego/eino/components/tool/utils"
 	"github.com/google/uuid"
-	"github.com/getkawai/unillm"
+	"github.com/yudaprama/tools/image"
 )
 
 // Text2ImageInput defines input for text2image tool
@@ -279,15 +279,15 @@ func truncateString(s string, maxLen int) string {
 // Tool Registration
 // ============================================================================
 
-// RegisterImageDesigner registers the lobe-image-designer tool (DALL-E compatible)
-func RegisterImageDesigner(registry *tools.ToolRegistry) error {
+// NewImageDesigner creates the lobe-image-designer tool (DALL-E compatible).
+func NewImageDesigner(_ context.Context) ([]tool.InvokableTool, error) {
 	service := NewImageDesignerService()
 
-	tool := unillm.NewAgentTool("lobe-image-designer__text2image",
+	text2imageTool, err := utils.InferTool("lobe-image-designer__text2image",
 		"Create images from text prompts using AI image generation. Generate up to 4 diverse images based on the description.",
-		func(ctx context.Context, input Text2ImageInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+		func(ctx context.Context, input *Text2ImageInput) (string, error) {
 			if len(input.Prompts) == 0 {
-				return unillm.NewTextErrorResponse("at least one prompt is required"), nil
+				return "", fmt.Errorf("at least one prompt is required")
 			}
 
 			prompts := input.Prompts
@@ -297,14 +297,17 @@ func RegisterImageDesigner(registry *tools.ToolRegistry) error {
 
 			results, err := service.Text2Image(prompts, input.Quality, input.Size, input.Style, input.Seeds)
 			if err != nil {
-				return unillm.NewTextErrorResponse(err.Error()), nil
+				return "", err
 			}
 
 			resultJSON, _ := json.Marshal(results)
 			log.Printf("🖼️  Generated %d images", len(results))
-			return unillm.NewTextResponse(string(resultJSON)), nil
+			return string(resultJSON), nil
 		},
 	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to infer text2image tool: %w", err)
+	}
 
-	return registry.Register(tool)
+	return []tool.InvokableTool{text2imageTool}, nil
 }

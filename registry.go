@@ -5,84 +5,109 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/getkawai/unillm"
+	"github.com/cloudwego/eino/components/tool"
 )
 
-// ToolRegistry manages unillm.AgentTool instances
+// ToolRegistry manages eino tool.InvokableTool instances.
 type ToolRegistry struct {
-	tools   map[string]unillm.AgentTool
+	tools   map[string]tool.InvokableTool
+	order   []string
 	enabled map[string]bool
 }
 
-// NewToolRegistry creates a new tool registry
+// NewToolRegistry creates a new tool registry.
 func NewToolRegistry() *ToolRegistry {
 	return &ToolRegistry{
-		tools:   make(map[string]unillm.AgentTool),
+		tools:   make(map[string]tool.InvokableTool),
 		enabled: make(map[string]bool),
 	}
 }
 
-// Register registers a tool
-func (r *ToolRegistry) Register(tool unillm.AgentTool) error {
-	info := tool.Info()
+// Register registers a tool.
+func (r *ToolRegistry) Register(t tool.InvokableTool) error {
+	info, err := t.Info(context.Background())
+	if err != nil {
+		return fmt.Errorf("failed to read tool info: %w", err)
+	}
 	if info.Name == "" {
 		return fmt.Errorf("tool name is required")
 	}
 
-	r.tools[info.Name] = tool
+	if _, exists := r.tools[info.Name]; !exists {
+		r.order = append(r.order, info.Name)
+	}
+	r.tools[info.Name] = t
 	r.enabled[info.Name] = true // enabled by default
 	return nil
 }
 
-// Get retrieves a tool by name
-func (r *ToolRegistry) Get(name string) (unillm.AgentTool, bool) {
+// RegisterAll registers a slice of tools.
+func (r *ToolRegistry) RegisterAll(ts []tool.InvokableTool) error {
+	for _, t := range ts {
+		if err := r.Register(t); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Get retrieves a tool by name.
+func (r *ToolRegistry) Get(name string) (tool.InvokableTool, bool) {
 	tool, ok := r.tools[name]
 	return tool, ok
 }
 
-// GetAll returns all tools
-func (r *ToolRegistry) GetAll() []unillm.AgentTool {
-	tools := make([]unillm.AgentTool, 0, len(r.tools))
-	for _, t := range r.tools {
-		tools = append(tools, t)
+// Names returns the names of all registered tools in registration order.
+func (r *ToolRegistry) Names() []string {
+	out := make([]string, len(r.order))
+	copy(out, r.order)
+	return out
+}
+
+// GetAll returns all tools in registration order.
+func (r *ToolRegistry) GetAll() []tool.InvokableTool {
+	tools := make([]tool.InvokableTool, 0, len(r.order))
+	for _, name := range r.order {
+		tools = append(tools, r.tools[name])
 	}
 	return tools
 }
 
-// GetEnabled returns all enabled tools
-func (r *ToolRegistry) GetEnabled() []unillm.AgentTool {
-	tools := make([]unillm.AgentTool, 0, len(r.tools))
-	for name, t := range r.tools {
+// GetEnabled returns all enabled tools in registration order.
+func (r *ToolRegistry) GetEnabled() []tool.InvokableTool {
+	tools := make([]tool.InvokableTool, 0, len(r.order))
+	for _, name := range r.order {
 		if r.enabled[name] {
+			tools = append(tools, r.tools[name])
+		}
+	}
+	return tools
+}
+
+// GetByNames returns tools by names (or all enabled if empty).
+func (r *ToolRegistry) GetByNames(names []string) []tool.InvokableTool {
+	if len(names) == 0 {
+		return r.GetEnabled()
+	}
+
+	tools := make([]tool.InvokableTool, 0, len(names))
+	for _, name := range names {
+		if t, ok := r.tools[name]; ok && r.enabled[name] {
 			tools = append(tools, t)
 		}
 	}
 	return tools
 }
 
-// GetByNames returns tools by names (or all enabled if empty)
-func (r *ToolRegistry) GetByNames(names []string) []unillm.AgentTool {
-	if len(names) == 0 {
-		return r.GetEnabled()
-	}
-
-	tools := make([]unillm.AgentTool, 0, len(names))
-	for _, name := range names {
-		if tool, ok := r.tools[name]; ok && r.enabled[name] {
-			tools = append(tools, tool)
-		}
-	}
-	return tools
-}
-
-// ToAgentTools returns tools as []unillm.AgentTool (same as GetByNames)
-func (r *ToolRegistry) ToAgentTools(names []string) []unillm.AgentTool {
+// ToAgentTools returns tools as []tool.InvokableTool (same as GetByNames),
+// ready to pass directly to an eino agent.
+func (r *ToolRegistry) ToAgentTools(names []string) []tool.InvokableTool {
 	return r.GetByNames(names)
 }
 
-// Execute executes a tool by name
-func (r *ToolRegistry) Execute(ctx context.Context, name string, args map[string]string) (string, error) {
-	tool, ok := r.tools[name]
+// Execute executes a tool by name with a JSON-encoded arguments string.
+func (r *ToolRegistry) Execute(ctx context.Context, name string, argsJSON string) (string, error) {
+	t, ok := r.tools[name]
 	if !ok {
 		return "", fmt.Errorf("tool not found: %s", name)
 	}
@@ -91,27 +116,10 @@ func (r *ToolRegistry) Execute(ctx context.Context, name string, args map[string
 		return "", fmt.Errorf("tool is disabled: %s", name)
 	}
 
-	// Convert args to JSON for ToolCall
-	argsJSON, _ := json.Marshal(args)
-	call := unillm.ToolCall{
-		ID:    name,
-		Name:  name,
-		Input: string(argsJSON),
-	}
-
-	resp, err := tool.Run(ctx, call)
-	if err != nil {
-		return "", err
-	}
-
-	if resp.IsError {
-		return "", fmt.Errorf("%s", resp.Content)
-	}
-
-	return resp.Content, nil
+	return t.InvokableRun(ctx, argsJSON)
 }
 
-// Enable enables a tool
+// Enable enables a tool.
 func (r *ToolRegistry) Enable(name string) bool {
 	if _, ok := r.tools[name]; ok {
 		r.enabled[name] = true
@@ -120,7 +128,7 @@ func (r *ToolRegistry) Enable(name string) bool {
 	return false
 }
 
-// Disable disables a tool
+// Disable disables a tool.
 func (r *ToolRegistry) Disable(name string) bool {
 	if _, ok := r.tools[name]; ok {
 		r.enabled[name] = false
@@ -129,29 +137,45 @@ func (r *ToolRegistry) Disable(name string) bool {
 	return false
 }
 
-// IsEnabled checks if a tool is enabled
+// IsEnabled checks if a tool is enabled.
 func (r *ToolRegistry) IsEnabled(name string) bool {
 	return r.enabled[name]
 }
 
-// FormatForPrompt formats tools as JSON for system prompt
+// FormatForPrompt formats tools as JSON (OpenAI function-calling style) for
+// injection into a system prompt. Returns "" when no tools are selected.
 func (r *ToolRegistry) FormatForPrompt(toolNames []string) (string, error) {
 	tools := r.GetByNames(toolNames)
 	if len(tools) == 0 {
 		return "", nil
 	}
 
-	simplified := make([]map[string]interface{}, len(tools))
-	for i, t := range tools {
-		info := t.Info()
-		simplified[i] = map[string]interface{}{
+	simplified := make([]map[string]interface{}, 0, len(tools))
+	for _, t := range tools {
+		info, err := t.Info(context.Background())
+		if err != nil {
+			return "", err
+		}
+
+		var params any
+		if info.ParamsOneOf != nil {
+			js, err := info.ParamsOneOf.ToJSONSchema()
+			if err != nil {
+				return "", fmt.Errorf("failed to render schema for %s: %w", info.Name, err)
+			}
+			params = js
+		} else {
+			params = map[string]any{"type": "object", "properties": map[string]any{}}
+		}
+
+		simplified = append(simplified, map[string]interface{}{
 			"type": "function",
 			"function": map[string]interface{}{
 				"name":        info.Name,
-				"description": info.Description,
-				"parameters":  info.Parameters,
+				"description": info.Desc,
+				"parameters":  params,
 			},
-		}
+		})
 	}
 
 	toolsJSON, err := json.MarshalIndent(simplified, "", "  ")

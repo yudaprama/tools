@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/getkawai/unillm"
-	"github.com/yudaprama/tools"
+	"github.com/cloudwego/eino/components/tool"
+	"github.com/cloudwego/eino/components/tool/utils"
 	"github.com/getkawai/database/db"
 )
 
@@ -75,22 +75,21 @@ func (s *VideoDescribeService) GetVideoTranscription(ctx context.Context, fileID
 	return "", fmt.Errorf("timeout waiting for video transcription (file_id: %s)", fileID)
 }
 
-// RegisterVideoDescribe registers the video describe tool
-func RegisterVideoDescribe(registry *tools.ToolRegistry, sqlDB *sql.DB) error {
+// NewVideoDescribe creates the video describe tool (requires a DB connection).
+func NewVideoDescribe(_ context.Context, sqlDB *sql.DB) ([]tool.InvokableTool, error) {
 	service := NewVideoDescribeService(sqlDB)
 
-	tool := unillm.NewParallelAgentTool("lobe-video-describe__getVideoTranscription",
+	videoDescribeTool, err := utils.InferTool("lobe-video-describe__getVideoTranscription",
 		"Get AI-generated transcription of an uploaded video's audio. Use this when user asks about what is said in the video, video content, spoken words, dialogue, or audio transcription. The transcription is generated using Whisper STT when the video was uploaded.",
-		func(ctx context.Context, input VideoDescribeInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+		func(ctx context.Context, input *VideoDescribeInput) (string, error) {
 			if input.FileID == "" {
-				return unillm.NewTextErrorResponse("file_id parameter is required"), nil
+				return "", fmt.Errorf("file_id parameter is required")
 			}
 
-			// Wait up to 3 minutes for transcription (video processing takes longer)
 			transcription, err := service.GetVideoTranscription(ctx, input.FileID, 3*time.Minute)
 			if err != nil {
 				log.Printf("⚠️  [VideoDescribe] Failed to get transcription: %v", err)
-				return unillm.NewTextErrorResponse(err.Error()), nil
+				return "", err
 			}
 
 			result := map[string]interface{}{
@@ -101,12 +100,15 @@ func RegisterVideoDescribe(registry *tools.ToolRegistry, sqlDB *sql.DB) error {
 
 			resultJSON, err := json.Marshal(result)
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("failed to marshal result: %v", err)), nil
+				return "", fmt.Errorf("failed to marshal result: %v", err)
 			}
 
-			return unillm.NewTextResponse(string(resultJSON)), nil
+			return string(resultJSON), nil
 		},
 	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to infer getVideoTranscription tool: %w", err)
+	}
 
-	return registry.Register(tool)
+	return []tool.InvokableTool{videoDescribeTool}, nil
 }

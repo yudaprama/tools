@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/getkawai/unillm"
-	"github.com/yudaprama/tools"
+	"github.com/cloudwego/eino/components/tool"
+	"github.com/cloudwego/eino/components/tool/utils"
 	"github.com/yudaprama/tools/localfs"
 )
 
@@ -384,36 +384,34 @@ func (s *LocalSystemService) GlobFiles(pattern, path string) (*GlobFilesState, e
 // Tool Registration
 // ============================================================================
 
-// RegisterLocalSystem registers the lobe-local-system tools
-func RegisterLocalSystem(registry *tools.ToolRegistry) error {
+// NewLocalSystem creates the lobe-local-system tools.
+func NewLocalSystem(_ context.Context) ([]tool.InvokableTool, error) {
 	service := NewLocalSystemService()
 
-	// Tool 1: listLocalFiles (read-only, parallel safe)
-	listTool := unillm.NewParallelAgentTool("lobe-local-system__listLocalFiles",
+	listTool, err := utils.InferTool("lobe-local-system__listLocalFiles",
 		"List files and folders in a specified directory. Returns a JSON array of file/folder information.",
-		func(ctx context.Context, input ListFilesInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+		func(ctx context.Context, input *ListFilesInput) (string, error) {
 			if input.Path == "" {
-				return unillm.NewTextErrorResponse("path is required"), nil
+				return "", fmt.Errorf("path is required")
 			}
 			result, err := service.ListLocalFiles(input.Path)
 			if err != nil {
-				return unillm.NewTextErrorResponse(err.Error()), nil
+				return "", err
 			}
 			resultJSON, _ := json.Marshal(result)
 			log.Printf("📁 Listed %d items in: %s", len(result.ListResults), input.Path)
-			return unillm.NewTextResponse(string(resultJSON)), nil
+			return string(resultJSON), nil
 		},
 	)
-	if err := registry.Register(listTool); err != nil {
-		return fmt.Errorf("failed to register listLocalFiles: %w", err)
+	if err != nil {
+		return nil, fmt.Errorf("failed to infer listLocalFiles: %w", err)
 	}
 
-	// Tool 2: readLocalFile (read-only, parallel safe)
-	readTool := unillm.NewParallelAgentTool("lobe-local-system__readLocalFile",
+	readTool, err := utils.InferTool("lobe-local-system__readLocalFile",
 		"Read the content of a specific file. Returns the file content with metadata.",
-		func(ctx context.Context, input ReadFileInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+		func(ctx context.Context, input *ReadFileInput) (string, error) {
 			if input.Path == "" {
-				return unillm.NewTextErrorResponse("path is required"), nil
+				return "", fmt.Errorf("path is required")
 			}
 			loc := [2]int{0, 200}
 			if len(input.Loc) >= 2 {
@@ -421,96 +419,92 @@ func RegisterLocalSystem(registry *tools.ToolRegistry) error {
 			}
 			result, err := service.ReadLocalFile(input.Path, loc)
 			if err != nil {
-				return unillm.NewTextErrorResponse(err.Error()), nil
+				return "", err
 			}
 			resultJSON, _ := json.Marshal(result)
 			log.Printf("📄 Read file: %s (lines %d-%d)", input.Path, loc[0], loc[1])
-			return unillm.NewTextResponse(string(resultJSON)), nil
+			return string(resultJSON), nil
 		},
 	)
-	if err := registry.Register(readTool); err != nil {
-		return fmt.Errorf("failed to register readLocalFile: %w", err)
+	if err != nil {
+		return nil, fmt.Errorf("failed to infer readLocalFile: %w", err)
 	}
 
-	// Tool 3: searchLocalFiles (read-only, parallel safe)
-	searchTool := unillm.NewParallelAgentTool("lobe-local-system__searchLocalFiles",
+	searchTool, err := utils.InferTool("lobe-local-system__searchLocalFiles",
 		"Search for files within a directory based on keywords. Returns matching files.",
-		func(ctx context.Context, input SearchFilesInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+		func(ctx context.Context, input *SearchFilesInput) (string, error) {
 			if input.Keywords == "" {
-				return unillm.NewTextErrorResponse("keywords is required"), nil
+				return "", fmt.Errorf("keywords is required")
 			}
 			result, err := service.SearchLocalFiles(input.Keywords, input.Directory)
 			if err != nil {
-				return unillm.NewTextErrorResponse(err.Error()), nil
+				return "", err
 			}
 			resultJSON, _ := json.Marshal(result)
 			log.Printf("🔍 Found %d files matching: %s", len(result.SearchResults), input.Keywords)
-			return unillm.NewTextResponse(string(resultJSON)), nil
+			return string(resultJSON), nil
 		},
 	)
-	if err := registry.Register(searchTool); err != nil {
-		return fmt.Errorf("failed to register searchLocalFiles: %w", err)
+	if err != nil {
+		return nil, fmt.Errorf("failed to infer searchLocalFiles: %w", err)
 	}
 
-	// Tool 4: writeLocalFile (modifies filesystem, NOT parallel safe)
-	writeTool := unillm.NewAgentTool("lobe-local-system__writeLocalFile",
+	writeTool, err := utils.InferTool("lobe-local-system__writeLocalFile",
 		"Write content to a specific file. Creates the file if it doesn't exist.",
-		func(ctx context.Context, input WriteFileInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+		func(ctx context.Context, input *WriteFileInput) (string, error) {
 			if input.Path == "" {
-				return unillm.NewTextErrorResponse("path is required"), nil
+				return "", fmt.Errorf("path is required")
 			}
 			result, err := service.WriteLocalFile(input.Path, input.Content)
 			if err != nil {
-				return unillm.NewTextErrorResponse(err.Error()), nil
+				return "", err
 			}
 			resultJSON, _ := json.Marshal(result)
 			log.Printf("✏️  Wrote file: %s", input.Path)
-			return unillm.NewTextResponse(string(resultJSON)), nil
+			return string(resultJSON), nil
 		},
 	)
-	if err := registry.Register(writeTool); err != nil {
-		return fmt.Errorf("failed to register writeLocalFile: %w", err)
+	if err != nil {
+		return nil, fmt.Errorf("failed to infer writeLocalFile: %w", err)
 	}
 
-	// Tool 5: renameLocalFile (modifies filesystem, NOT parallel safe)
-	renameTool := unillm.NewAgentTool("lobe-local-system__renameLocalFile",
+	renameTool, err := utils.InferTool("lobe-local-system__renameLocalFile",
 		"Rename a file or folder in its current location.",
-		func(ctx context.Context, input RenameFileInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+		func(ctx context.Context, input *RenameFileInput) (string, error) {
 			if input.Path == "" || input.NewName == "" {
-				return unillm.NewTextErrorResponse("path and newName are required"), nil
+				return "", fmt.Errorf("path and newName are required")
 			}
 			result, err := service.RenameLocalFile(input.Path, input.NewName)
 			if err != nil {
-				return unillm.NewTextErrorResponse(err.Error()), nil
+				return "", err
 			}
 			resultJSON, _ := json.Marshal(result)
 			log.Printf("📝 Renamed: %s -> %s", input.Path, result.NewPath)
-			return unillm.NewTextResponse(string(resultJSON)), nil
+			return string(resultJSON), nil
 		},
 	)
-	if err := registry.Register(renameTool); err != nil {
-		return fmt.Errorf("failed to register renameLocalFile: %w", err)
+	if err != nil {
+		return nil, fmt.Errorf("failed to infer renameLocalFile: %w", err)
 	}
 
-	// Tool 6: moveLocalFiles (modifies filesystem, NOT parallel safe)
-	moveTool := unillm.NewAgentTool("lobe-local-system__moveLocalFiles",
+	moveTool, err := utils.InferTool("lobe-local-system__moveLocalFiles",
 		"Move or rename multiple files/directories.",
-		func(ctx context.Context, input MoveFilesInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+		func(ctx context.Context, input *MoveFilesInput) (string, error) {
 			if len(input.Items) == 0 {
-				return unillm.NewTextErrorResponse("items is required"), nil
+				return "", fmt.Errorf("items is required")
 			}
 			result, err := service.MoveLocalFiles(input.Items)
 			if err != nil {
-				return unillm.NewTextErrorResponse(err.Error()), nil
+				return "", err
 			}
 			resultJSON, _ := json.Marshal(result)
 			log.Printf("📦 Moved %d/%d files", result.SuccessCount, result.TotalCount)
-			return unillm.NewTextResponse(string(resultJSON)), nil
+			return string(resultJSON), nil
 		},
 	)
-	if err := registry.Register(moveTool); err != nil {
-		return fmt.Errorf("failed to register moveLocalFiles: %w", err)
+	if err != nil {
+		return nil, fmt.Errorf("failed to infer moveLocalFiles: %w", err)
 	}
 
-	return nil
+	return []tool.InvokableTool{listTool, readTool, searchTool, writeTool, renameTool, moveTool}, nil
 }

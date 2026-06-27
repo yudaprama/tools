@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/Knetic/govaluate"
-	"github.com/getkawai/unillm"
-	"github.com/yudaprama/tools"
+	"github.com/cloudwego/eino/components/tool"
+	"github.com/cloudwego/eino/components/tool/utils"
 )
 
 // CalculatorInput defines input for calculator tool
@@ -14,30 +14,31 @@ type CalculatorInput struct {
 	Expression string `json:"expression" jsonschema:"description=The mathematical expression to evaluate (e.g. '2 + 2'&#44; 'sqrt(16)'&#44; 'sin(pi/2)')"`
 }
 
-// RegisterCalculator registers the calculator tool
-func RegisterCalculator(registry *tools.ToolRegistry) error {
-	tool := unillm.NewParallelAgentTool("calculator",
+// NewCalculator creates the calculator tool.
+func NewCalculator(_ context.Context) ([]tool.InvokableTool, error) {
+	calcTool, err := utils.InferTool("calculator",
 		"Perform mathematical calculations. Supports: +, -, *, /, sqrt(), sin(), cos(), tan(), pow(), pi, e",
-		func(ctx context.Context, input CalculatorInput, call unillm.ToolCall) (unillm.ToolResponse, error) {
+		func(ctx context.Context, input *CalculatorInput) (string, error) {
 			if input.Expression == "" {
-				return unillm.NewTextErrorResponse("expression parameter is required"), nil
+				return "", fmt.Errorf("expression parameter is required")
 			}
 
-			// Create evaluator with math functions
 			expr, err := govaluate.NewEvaluableExpression(input.Expression)
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("invalid expression: %v", err)), nil
+				return "", fmt.Errorf("invalid expression: %v", err)
 			}
 
-			// Evaluate expression
 			result, err := expr.Evaluate(nil)
 			if err != nil {
-				return unillm.NewTextErrorResponse(fmt.Sprintf("evaluation failed: %v", err)), nil
+				return "", fmt.Errorf("evaluation failed: %v", err)
 			}
 
-			return unillm.NewTextResponse(fmt.Sprintf("%v", result)), nil
+			return fmt.Sprintf("%v", result), nil
 		},
 	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to infer calculator tool: %w", err)
+	}
 
-	return registry.Register(tool)
+	return []tool.InvokableTool{calcTool}, nil
 }
