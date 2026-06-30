@@ -142,7 +142,7 @@ Each group is also exposed as its own constructor: `builtin.NewCalculator(ctx)`,
 1. **`Execute` takes a JSON string, not a map** — `Execute(ctx, name, argsJSON string)`. The old `map[string]string` signature is gone.
 2. **`search/` tests hit live DuckDuckGo** — they fail offline / behind a TLS-intercepting proxy; not a code issue.
 3. **Struct tags drive the schema** — there is no manual params map anymore. Bad/missing tags = a broken tool schema the model can't call.
-4. **DB-backed tools were removed** — postgres/mysql (DuckDB) and image/video-describe (`getkawai/database`) tools are gone; `builtin.All(ctx)` no longer takes a `*sql.DB`. See git history if you need them back.
+4. **DB-backed tools were removed** — postgres/mysql and image/video-describe (`getkawai/database`) tools are gone; `builtin.All(ctx)` no longer takes a `*sql.DB`. See git history if you need them back.
 
 ## Runnable demo
 
