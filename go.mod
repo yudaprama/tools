@@ -6,7 +6,7 @@ require (
 	github.com/JohannesKaufmann/dom v0.2.0
 	github.com/Knetic/govaluate v3.0.0+incompatible
 	github.com/andybalholm/brotli v1.2.0
-	github.com/cloudwego/eino v0.9.8
+	github.com/cloudwego/eino v0.9.12
 	github.com/eino-contrib/jsonschema v1.0.3
 	github.com/google/uuid v1.6.0
 	github.com/kawai-network/x v1.0.43
