@@ -2,7 +2,7 @@ package search
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"os"
 	"strings"
 )
@@ -38,22 +38,22 @@ func (s *Service) Query(query string, params *SearchParams) (*UniformSearchRespo
 	// Try Brave first
 	response, err := s.braveProvider.Query(ctx, query, params)
 	if err == nil {
-		log.Printf("🔍 Search provider: Brave (query=%s, results=%d)", query, len(response.Results))
+		slog.Info("search provider: Brave", "query", query, "results", len(response.Results))
 		return response, nil
 	}
 
 	// Log Brave failure and fallback
-	log.Printf("⚠️  Brave search failed: %v. Falling back to DuckDuckGo...", err)
+	slog.Warn("Brave search failed, falling back to DuckDuckGo", "err", err)
 
 	// If Brave fails, fallback to DuckDuckGo
 	response, err = s.duckduckgoProvider.Query(ctx, query, params)
 	if err == nil {
-		log.Printf("🔍 Search provider: DuckDuckGo (query=%s, results=%d)", query, len(response.Results))
+		slog.Info("search provider: DuckDuckGo", "query", query, "results", len(response.Results))
 		return response, nil
 	}
 
 	// Both providers failed
-	log.Printf("❌ All search providers failed for query: %s", query)
+	slog.Error("all search providers failed", "query", query)
 	return nil, err
 }
 

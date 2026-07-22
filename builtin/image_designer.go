@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -113,7 +113,7 @@ func (s *ImageDesignerService) Text2Image(prompts []string, quality, size, style
 
 	// Check if SD is available
 	if !s.IsAvailable() {
-		log.Printf("⚠️  Stable Diffusion not available, using placeholder images")
+		slog.Warn("Stable Diffusion not available, using placeholder images")
 		return s.generatePlaceholders(prompts, quality, size, style, seeds)
 	}
 
@@ -122,11 +122,11 @@ func (s *ImageDesignerService) Text2Image(prompts []string, quality, size, style
 	modelPath := s.GetFirstAvailableModel()
 
 	if modelPath == "" {
-		log.Printf("⚠️  No SD model found, using placeholder images")
+		slog.Warn("No SD model found, using placeholder images")
 		return s.generatePlaceholders(prompts, quality, size, style, seeds)
 	}
 
-	log.Printf("🎨 Using Stable Diffusion: %s", filepath.Base(modelPath))
+	slog.Info("Using Stable Diffusion", "model", filepath.Base(modelPath))
 
 	results := make([]DallEImageItem, 0, len(prompts))
 
@@ -168,11 +168,11 @@ func (s *ImageDesignerService) Text2Image(prompts []string, quality, size, style
 			Seed:           &seed,
 		}
 
-		log.Printf("🖼️  Generating image %d/%d: %s", i+1, len(prompts), truncateString(prompt, 50))
+		slog.Info("generating image", "index", i+1, "total", len(prompts), "prompt", truncateString(prompt, 50))
 
 		// Execute SD via the manager
 		if err := s.sdManager.CreateImageWithOptions(options); err != nil {
-			log.Printf("⚠️  SD generation failed: %v", err)
+			slog.Warn("SD generation failed", "err", err)
 			// Fallback to placeholder
 			result := s.generateSinglePlaceholder(prompt, quality, size, style, i)
 			results = append(results, result)
@@ -181,7 +181,7 @@ func (s *ImageDesignerService) Text2Image(prompts []string, quality, size, style
 
 		// Check if output was created
 		if _, err := os.Stat(outputPath); err != nil {
-			log.Printf("⚠️  Output image not found: %s", outputPath)
+			slog.Warn("Output image not found", "path", outputPath)
 			result := s.generateSinglePlaceholder(prompt, quality, size, style, i)
 			results = append(results, result)
 			continue
@@ -190,7 +190,7 @@ func (s *ImageDesignerService) Text2Image(prompts []string, quality, size, style
 		// Read image and convert to data URL for preview
 		imageData, err := os.ReadFile(outputPath)
 		if err != nil {
-			log.Printf("⚠️  Failed to read output image: %v", err)
+			slog.Warn("Failed to read output image", "err", err)
 			result := s.generateSinglePlaceholder(prompt, quality, size, style, i)
 			results = append(results, result)
 			continue
@@ -208,7 +208,7 @@ func (s *ImageDesignerService) Text2Image(prompts []string, quality, size, style
 			Style:      style,
 		})
 
-		log.Printf("✅ Generated image: %s", imageId)
+		slog.Info("generated image", "id", imageId)
 	}
 
 	return results, nil
@@ -236,7 +236,7 @@ func (s *ImageDesignerService) generateSinglePlaceholder(prompt, quality, size, 
 	width, height := parseDallESize(size)
 	placeholderUrl := fmt.Sprintf("https://picsum.photos/seed/%d/%d/%d", index, width, height)
 
-	log.Printf("🎨 Generated placeholder for: %s", truncateString(prompt, 50))
+	slog.Info("generated placeholder", "prompt", truncateString(prompt, 50))
 
 	return DallEImageItem{
 		Prompt:     prompt,
@@ -301,7 +301,7 @@ func NewImageDesigner(_ context.Context) ([]tool.InvokableTool, error) {
 			}
 
 			resultJSON, _ := json.Marshal(results)
-			log.Printf("🖼️  Generated %d images", len(results))
+			slog.Info("generated images", "count", len(results))
 			return string(resultJSON), nil
 		},
 	)

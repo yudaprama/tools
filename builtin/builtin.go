@@ -2,7 +2,7 @@ package builtin
 
 import (
 	"context"
-	"log"
+	"log/slog"
 
 	"github.com/cloudwego/eino/components/tool"
 )
@@ -10,7 +10,7 @@ import (
 // All builds every builtin eino tool. A tool group whose backing engine is
 // unavailable at runtime is skipped with a warning rather than failing the set.
 func All(ctx context.Context) ([]tool.InvokableTool, error) {
-	log.Println("Building builtin tools (eino)...")
+		slog.Info("Building builtin tools (eino)...")
 	var all []tool.InvokableTool
 
 	groups := []string{
@@ -48,7 +48,7 @@ func All(ctx context.Context) ([]tool.InvokableTool, error) {
 		if err != nil {
 			return nil, err
 		}
-		log.Printf("✅ Built: %s", name)
+		slog.Info("built", "group", name)
 		all = append(all, ts...)
 	}
 

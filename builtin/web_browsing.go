@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"time"
 
 	"github.com/cloudwego/eino/components/tool"
@@ -124,7 +124,7 @@ func (s *WebBrowsingService) CrawlMultiPages(urls []string) (*CrawlPluginState, 
 
 		if r.Error != nil {
 			// Skip error results - don't include them in tool result
-			log.Printf("⚠️ Skipping failed crawl result for URL: %s (Error: %s)", originalUrl, r.Error.ErrorMessage)
+			slog.Warn("skipping failed crawl result", "url", originalUrl, "error", r.Error.ErrorMessage)
 			continue
 		} else if r.Success != nil {
 			// Use crawler label from result: "jina" for Jina, "kawai" for naive
@@ -180,7 +180,7 @@ func NewWebBrowsing(_ context.Context) ([]tool.InvokableTool, error) {
 				return "", fmt.Errorf("failed to marshal response: %v", err)
 			}
 
-			log.Printf("🔍 Web search completed: query=%s, results=%d", input.Query, len(response.Results))
+			slog.Info("web search completed", "query", input.Query, "results", len(response.Results))
 			return string(resultJSON), nil
 		},
 	)
@@ -205,7 +205,7 @@ func NewWebBrowsing(_ context.Context) ([]tool.InvokableTool, error) {
 				return "", fmt.Errorf("failed to marshal response: %v", err)
 			}
 
-			log.Printf("🌐 Crawled single page: url=%s", input.URL)
+			slog.Info("crawled single page", "url", input.URL)
 			return string(resultJSON), nil
 		},
 	)
@@ -230,7 +230,7 @@ func NewWebBrowsing(_ context.Context) ([]tool.InvokableTool, error) {
 				return "", fmt.Errorf("failed to marshal response: %v", err)
 			}
 
-			log.Printf("🌐 Crawled %d pages", len(input.URLs))
+			slog.Info("crawled pages", "count", len(input.URLs))
 			return string(resultJSON), nil
 		},
 	)

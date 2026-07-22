@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 
 	"github.com/cloudwego/eino/components/tool"
 	"github.com/cloudwego/eino/components/tool/utils"
@@ -399,7 +399,7 @@ func NewLocalSystem(_ context.Context) ([]tool.InvokableTool, error) {
 				return "", err
 			}
 			resultJSON, _ := json.Marshal(result)
-			log.Printf("📁 Listed %d items in: %s", len(result.ListResults), input.Path)
+						slog.Info("listed directory", "count", len(result.ListResults), "path", input.Path)
 			return string(resultJSON), nil
 		},
 	)
@@ -422,7 +422,7 @@ func NewLocalSystem(_ context.Context) ([]tool.InvokableTool, error) {
 				return "", err
 			}
 			resultJSON, _ := json.Marshal(result)
-			log.Printf("📄 Read file: %s (lines %d-%d)", input.Path, loc[0], loc[1])
+			slog.Info("read file", "path", input.Path, "start_line", loc[0], "end_line", loc[1])
 			return string(resultJSON), nil
 		},
 	)
@@ -441,7 +441,7 @@ func NewLocalSystem(_ context.Context) ([]tool.InvokableTool, error) {
 				return "", err
 			}
 			resultJSON, _ := json.Marshal(result)
-			log.Printf("🔍 Found %d files matching: %s", len(result.SearchResults), input.Keywords)
+			slog.Info("searched files", "count", len(result.SearchResults), "keywords", input.Keywords)
 			return string(resultJSON), nil
 		},
 	)
@@ -460,7 +460,7 @@ func NewLocalSystem(_ context.Context) ([]tool.InvokableTool, error) {
 				return "", err
 			}
 			resultJSON, _ := json.Marshal(result)
-			log.Printf("✏️  Wrote file: %s", input.Path)
+			slog.Info("wrote file", "path", input.Path)
 			return string(resultJSON), nil
 		},
 	)
@@ -479,7 +479,7 @@ func NewLocalSystem(_ context.Context) ([]tool.InvokableTool, error) {
 				return "", err
 			}
 			resultJSON, _ := json.Marshal(result)
-			log.Printf("📝 Renamed: %s -> %s", input.Path, result.NewPath)
+			slog.Info("renamed", "old_path", input.Path, "new_path", result.NewPath)
 			return string(resultJSON), nil
 		},
 	)
@@ -498,7 +498,7 @@ func NewLocalSystem(_ context.Context) ([]tool.InvokableTool, error) {
 				return "", err
 			}
 			resultJSON, _ := json.Marshal(result)
-			log.Printf("📦 Moved %d/%d files", result.SuccessCount, result.TotalCount)
+			slog.Info("moved files", "success", result.SuccessCount, "total", result.TotalCount)
 			return string(resultJSON), nil
 		},
 	)

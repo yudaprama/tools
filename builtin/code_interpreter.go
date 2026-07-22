@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"os/exec"
 	"strings"
 	"time"
@@ -66,11 +66,11 @@ func (s *CodeInterpreterService) ExecutePython(code string, packages []string) (
 				continue
 			}
 
-			log.Printf("📦 Installing package: %s", pkg)
+			slog.Info("installing package", "pkg", pkg)
 
 			installCmd := exec.Command("pip", "install", "-q", pkg)
 			if err := installCmd.Run(); err != nil {
-				log.Printf("⚠️  Failed to install %s: %v (continuing anyway)", pkg, err)
+				slog.Warn("failed to install package, continuing anyway", "pkg", pkg, "err", err)
 			}
 		}
 	}
@@ -225,7 +225,7 @@ func NewCodeInterpreter(_ context.Context) ([]tool.InvokableTool, error) {
 				return "", fmt.Errorf("code is required")
 			}
 
-			log.Printf("🐍 Executing Python code (%d chars, %d packages)", len(input.Code), len(input.Packages))
+			slog.Info("executing python code", "chars", len(input.Code), "packages", len(input.Packages))
 
 			response, err := service.ExecutePython(input.Code, input.Packages)
 			if err != nil {
@@ -233,8 +233,7 @@ func NewCodeInterpreter(_ context.Context) ([]tool.InvokableTool, error) {
 			}
 
 			resultJSON, _ := json.Marshal(response)
-			log.Printf("✅ Python execution complete (result: %v, outputs: %d, files: %d)",
-				response.Result != "", len(response.Output), len(response.Files))
+			slog.Info("python execution complete", "has_result", response.Result != "", "outputs", len(response.Output), "files", len(response.Files))
 
 			return string(resultJSON), nil
 		},

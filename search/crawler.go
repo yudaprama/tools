@@ -2,7 +2,7 @@ package search
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
@@ -61,7 +61,7 @@ func (c *Crawler) CrawlPages(urls []string, impls []CrawlImplType) []CrawlResult
 			defer wg.Done() // ✅ MUST be first defer to ensure it always executes
 			defer func() {
 				if r := recover(); r != nil {
-					log.Printf("❌ [PANIC] Crawler panic recovered for URL %s: %v", u, r)
+					slog.Error("crawler panic recovered", "url", u, "recover", r)
 					results[idx] = CrawlResult{
 						Success: &htmltomarkdown.CrawlSuccessResult{
 							URL:     u,
@@ -95,7 +95,7 @@ func (c *Crawler) crawlSingle(urlStr string, impls []CrawlImplType) CrawlResult 
 		return result
 	}
 
-	log.Printf("❌ All crawlers failed for %s: %v", urlStr, err)
+	slog.Warn("all crawlers failed", "url", urlStr, "err", err)
 
 	return CrawlResult{
 		Error: &CrawlErrorResult{
@@ -108,23 +108,23 @@ func (c *Crawler) crawlSingle(urlStr string, impls []CrawlImplType) CrawlResult 
 
 // crawlNaive performs naive HTTP crawling using htmltomarkdown.ConvertURL
 func (c *Crawler) crawlNaive(urlStr string) (CrawlResult, error) {
-	log.Printf("🔍 [crawlNaive] URL: %s", urlStr)
+	slog.Info("crawling URL", "url", urlStr)
 
 	result, err := htmltomarkdown.ConvertURL(urlStr, c.httpClient,
 		converter.WithCrawler("kawai"),
 		converter.WithMainContentOnly(),
 	)
 	if err != nil {
-		log.Printf("❌ [crawlNaive] Failed: %v", err)
+		slog.Warn("crawlNaive failed", "url", urlStr, "err", err)
 		return CrawlResult{}, err
 	}
 
 	if result.Title == "" {
-		log.Printf("⚠️  [crawlNaive] Empty title for %s, generating from URL", urlStr)
+		slog.Warn("empty title, generating from URL", "url", urlStr)
 		result.Title = generateTitleFromURL(urlStr)
 	}
 
-	log.Printf("✅ [crawlNaive] Title: %s, Website: %s, Content: %d chars", result.Title, result.Website, len(result.Content))
+	slog.Info("crawlNaive succeeded", "title", result.Title, "website", result.Website, "content_chars", len(result.Content))
 	return CrawlResult{
 		Success: result,
 	}, nil

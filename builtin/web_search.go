@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 
 	"github.com/cloudwego/eino/components/tool"
 	"github.com/cloudwego/eino/components/tool/utils"
@@ -42,7 +42,7 @@ func NewWebSearch(_ context.Context) ([]tool.InvokableTool, error) {
 
 			response, err := searchService.WebSearch(searchQuery)
 			if err != nil {
-				log.Printf("⚠️  Web search failed: %v", err)
+				slog.Warn("Web search failed", "err", err)
 				return "", fmt.Errorf("search failed: %v", err)
 			}
 

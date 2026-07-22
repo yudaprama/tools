@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 
 	"github.com/cloudwego/eino/components/tool"
 	"github.com/cloudwego/eino/components/tool/utils"
@@ -63,7 +63,7 @@ The search uses semantic similarity, so you can describe what you're looking for
 			}
 
 			if err != nil {
-				log.Printf("⚠️  Memory search failed: %v", err)
+				slog.Warn("Memory search failed", "err", err)
 				return "", fmt.Errorf("memory search failed: %v", err)
 			}
 
