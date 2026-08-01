@@ -35,12 +35,14 @@ func (p Paragraph) RemoveRun(r Run) {
 			if rc.R == r.x {
 				copy(c.EG_ContentRunContent[i:], c.EG_ContentRunContent[i+1:])
 				c.EG_ContentRunContent = c.EG_ContentRunContent[0 : len(c.EG_ContentRunContent)-1]
+				return
 			}
 			if rc.Sdt != nil && rc.Sdt.SdtContent != nil {
 				for i, rc2 := range rc.Sdt.SdtContent.EG_ContentRunContent {
 					if rc2.R == r.x {
 						copy(rc.Sdt.SdtContent.EG_ContentRunContent[i:], rc.Sdt.SdtContent.EG_ContentRunContent[i+1:])
 						rc.Sdt.SdtContent.EG_ContentRunContent = rc.Sdt.SdtContent.EG_ContentRunContent[0 : len(rc.Sdt.SdtContent.EG_ContentRunContent)-1]
+						return
 					}
 				}
 			}

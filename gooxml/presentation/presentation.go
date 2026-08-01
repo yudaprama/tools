@@ -641,8 +641,7 @@ func (p *Presentation) Slides() []Slide {
 
 // RemoveSlide removes a slide from a presentation.
 func (p *Presentation) RemoveSlide(s Slide) error {
-	removed := false
-	slideIdx := 0
+	slideIdx := -1
 	for i, v := range p.slides {
 		if v == s.x {
 			if p.x.SldIdLst.SldId[i] != s.sid {
@@ -657,12 +656,12 @@ func (p *Presentation) RemoveSlide(s Slide) error {
 			copy(p.x.SldIdLst.SldId[i:], p.x.SldIdLst.SldId[i+1:])
 			p.x.SldIdLst.SldId = p.x.SldIdLst.SldId[0 : len(p.x.SldIdLst.SldId)-1]
 
-			removed = true
 			slideIdx = i
+			break
 		}
 	}
 
-	if !removed {
+	if slideIdx == -1 {
 		return errors.New("unable to find slide")
 	}
 
