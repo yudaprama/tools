@@ -1,0 +1,28 @@
+.github/workflows/auto-tag.yml
+  s_9092f2a46f4b52::t_9c6ea7517a77af 4
+  s_9092f2a46f4b52::t_9680c8b9a12032 1
+  s_9092f2a46f4b52::t_a7cbfafa49a8e5 13
+  s_9092f2a46f4b52::t_19e32e00757ffc 36
+  s_9092f2a46f4b52::t_0ffba57c159e30 20
+  s_9092f2a46f4b52::t_7369ee5fee9790 2-3
+  s_9092f2a46f4b52::t_aaa2cc6afc8da1 5-7,10-12
+  s_9092f2a46f4b52::t_0606ba2c50381c 14-19
+  s_9092f2a46f4b52::t_6a1aee37ad7843 21-23,33-35
+  s_9092f2a46f4b52::t_8209f737deac2d 37-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.19",
+  "base_commit_sha": "600379f6bd123ce020fcbb14a78f5640c3cd42f1",
+  "prompts": {},
+  "sessions": {
+    "s_9092f2a46f4b52": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_041438438ffe7VHdFt22AdJquK",
+        "model": "mimo-v2.5-free"
+      },
+      "human_author": "yudaprama <yudhaprama@icloud.com>"
+    }
+  }
+}
