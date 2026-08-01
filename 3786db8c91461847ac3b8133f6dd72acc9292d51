@@ -1,0 +1,21 @@
+go.mod
+  s_8909b522d06fee::t_059f3aab5f889b 9
+go.sum
+  s_8909b522d06fee::t_c08996ff3e4ff4 27-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "3786db8c91461847ac3b8133f6dd72acc9292d51",
+  "prompts": {},
+  "sessions": {
+    "s_8909b522d06fee": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_082725baeffeKQCyzIs43rZWMK",
+        "model": "glm-5.2"
+      },
+      "human_author": "yudaprama <yudhaprama@icloud.com>"
+    }
+  }
+}

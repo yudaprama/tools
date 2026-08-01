@@ -1,0 +1,73 @@
+search/service.go
+  s_9fc8bc01b4ce80::t_24d1b4c3c99b91 46
+  s_9fc8bc01b4ce80::t_f7b02c9537708e 5
+  s_9fc8bc01b4ce80::t_abb34cf78c7886 41
+  s_9fc8bc01b4ce80::t_28903a1cd6b9f2 51
+  s_9fc8bc01b4ce80::t_5762b9b2e19d2e 56
+builtin/code_interpreter.go
+  s_9fc8bc01b4ce80::t_eec7dd257ded06 236
+  s_9fc8bc01b4ce80::t_7a172677776d55 8
+  s_9fc8bc01b4ce80::t_9b308d0b8949fe 73
+  s_9fc8bc01b4ce80::t_4716bfe85d9d90 228
+  s_9fc8bc01b4ce80::t_2736417b417c9a 69
+builtin/image_designer.go
+  s_9fc8bc01b4ce80::t_6479fc2264a610 171
+  s_9fc8bc01b4ce80::t_a652c1b99e5bcc 129
+  s_9fc8bc01b4ce80::t_b4b31633450b91 211
+  s_9fc8bc01b4ce80::t_82d1743121ff1d 125
+  s_9fc8bc01b4ce80::t_a8c2736ad08451 239
+  s_9fc8bc01b4ce80::t_bc2a6e1c13d4d4 193
+  s_9fc8bc01b4ce80::t_89e8170769a41c 116
+  s_9fc8bc01b4ce80::t_7979966b3a3f09 175
+  s_9fc8bc01b4ce80::t_a9dde85f5ddb7c 8
+  s_9fc8bc01b4ce80::t_a7f82731c86e09 184
+  s_9fc8bc01b4ce80::t_24f1b79844e17b 304
+builtin/web_browsing.go
+  s_9fc8bc01b4ce80::t_c458bcac37e7ae 208
+  s_9fc8bc01b4ce80::t_864a0e074bda67 233
+  s_9fc8bc01b4ce80::t_c2ee04773947cb 183
+  s_9fc8bc01b4ce80::t_3c888708973236 127
+  s_9fc8bc01b4ce80::t_2f25bda9b404d2 7
+builtin/local_system.go
+  s_9fc8bc01b4ce80::t_1bc4bb3a8929d8 482
+  s_9fc8bc01b4ce80::t_578513197467b2 501
+  s_9fc8bc01b4ce80::t_c98972608ba0b7 444
+  s_9fc8bc01b4ce80::t_a5dbcab4485913 402
+  s_9fc8bc01b4ce80::t_f9f13f19ddf896 463
+  s_9fc8bc01b4ce80::t_35e76f9cd63306 425
+  s_9fc8bc01b4ce80::t_7572c82f8ac48d 7
+builtin/builtin.go
+  s_9fc8bc01b4ce80::t_4e8fdf78c5d228 13
+  s_9fc8bc01b4ce80::t_e6e3a5d8bcc7b9 5
+  s_9fc8bc01b4ce80::t_6d1d852eaaac38 51
+builtin/web_search.go
+  s_9fc8bc01b4ce80::t_62b4213a3f43a3 45
+  s_9fc8bc01b4ce80::t_fde09ea2acee42 7
+builtin/memory_search.go
+  s_9fc8bc01b4ce80::t_2106d4025c031d 66
+  s_9fc8bc01b4ce80::t_4e17e5790acf93 7
+search/crawler.go
+  s_9fc8bc01b4ce80::t_a1ed3da842fd76 64
+  s_9fc8bc01b4ce80::t_2432e0e54c7409 111
+  s_9fc8bc01b4ce80::t_e1aa2b0f9ec190 118
+  s_9fc8bc01b4ce80::t_fc741aa17c24dc 127
+  s_9fc8bc01b4ce80::t_2c666368cd24d4 123
+  s_9fc8bc01b4ce80::t_39d7e2687f0ba1 98
+  s_9fc8bc01b4ce80::t_eac24e24edab2d 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "6efef3ed7bad6f7381cf7e455bbd0c8b309d2d0f",
+  "prompts": {},
+  "sessions": {
+    "s_9fc8bc01b4ce80": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_07958ceb2ffeovGxETl8p2ZGYo",
+        "model": "kawai-pro-max"
+      },
+      "human_author": "yudaprama <yudhaprama@icloud.com>"
+    }
+  }
+}
