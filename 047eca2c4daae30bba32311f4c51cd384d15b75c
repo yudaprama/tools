@@ -1,0 +1,23 @@
+gooxml/document/paragraph.go
+  s_f5c06684845e2b::t_c7d4b2306e4506 38,45
+gooxml/common/contenttypes.go
+  s_f5c06684845e2b::t_cd815a9c57c2cc 108
+gooxml/presentation/presentation.go
+  s_f5c06684845e2b::t_4128fb0145245c 644,660,664
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.19",
+  "base_commit_sha": "047eca2c4daae30bba32311f4c51cd384d15b75c",
+  "prompts": {},
+  "sessions": {
+    "s_f5c06684845e2b": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_041d9bdd0ffeU4osYtjY6phK7n",
+        "model": "ling-3.0-flash-free"
+      },
+      "human_author": "yudaprama <yudhaprama@icloud.com>"
+    }
+  }
+}
