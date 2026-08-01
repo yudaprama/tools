@@ -1,10 +1,8 @@
-name: Auto Tag On Merge
+name: Auto Tag On Push
 
 on:
-  pull_request:
-    types: [closed]
+  push:
     branches:
-      - main
       - master
 
 permissions:
@@ -12,18 +10,16 @@ permissions:
   pull-requests: read
 
 concurrency:
-  group: auto-tag-main-master
+  group: auto-tag
   cancel-in-progress: false
 
 jobs:
   tag:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout merge commit
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.merge_commit_sha }}
           fetch-depth: 0
 
       - name: Fetch tags
@@ -37,7 +33,7 @@ jobs:
 
           current_tag="$(git tag --list 'v*.*.*' | sort -V | tail -n1)"
           if [[ -z "${current_tag}" ]]; then
-            next_tag="v0.1.0"
+            next_tag="v0.2.2"
           else
             version="${current_tag#v}"
             IFS='.' read -r major minor patch <<< "${version}"
