@@ -2,8 +2,8 @@ package commonmark
 
 import (
 	"github.com/JohannesKaufmann/dom"
-	"github.com/getkawai/tools/htmltomarkdown/converter"
-	"github.com/getkawai/tools/htmltomarkdown/internal/domutils"
+	"github.com/yudaprama/tools/htmltomarkdown/converter"
+	"github.com/yudaprama/tools/htmltomarkdown/internal/domutils"
 	"golang.org/x/net/html"
 )
 

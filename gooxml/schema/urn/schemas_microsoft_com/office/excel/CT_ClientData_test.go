@@ -13,7 +13,7 @@ import (
 	"encoding/xml"
 	"testing"
 
-	"github.com/getkawai/tools/gooxml/schema/urn/schemas_microsoft_com/office/excel"
+	"github.com/yudaprama/tools/gooxml/schema/urn/schemas_microsoft_com/office/excel"
 )
 
 func TestCT_ClientDataConstructor(t *testing.T) {

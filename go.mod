@@ -1,4 +1,4 @@
-module github.com/getkawai/tools
+module github.com/yudaprama/tools
 
 go 1.26.0
 

@@ -10,8 +10,8 @@ package spreadsheet
 import (
 	"strings"
 
-	"github.com/getkawai/tools/gooxml"
-	"github.com/getkawai/tools/gooxml/schema/soo/sml"
+	"github.com/yudaprama/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml/schema/soo/sml"
 )
 
 // DataValidationList is just a view on a DataValidation configured as a list.

@@ -3,8 +3,8 @@ package commonmark
 import (
 	"bytes"
 
-	"github.com/getkawai/tools/htmltomarkdown/converter"
-	"github.com/getkawai/tools/htmltomarkdown/internal/textutils"
+	"github.com/yudaprama/tools/htmltomarkdown/converter"
+	"github.com/yudaprama/tools/htmltomarkdown/internal/textutils"
 	"golang.org/x/net/html"
 )
 

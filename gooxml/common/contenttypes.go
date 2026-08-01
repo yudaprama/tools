@@ -10,8 +10,8 @@ package common
 import (
 	"strings"
 
-	"github.com/getkawai/tools/gooxml"
-	"github.com/getkawai/tools/gooxml/schema/soo/pkg/content_types"
+	"github.com/yudaprama/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml/schema/soo/pkg/content_types"
 )
 
 // ContentTypes is the top level "[Content_Types].xml" in a zip package.

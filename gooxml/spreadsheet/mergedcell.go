@@ -10,7 +10,7 @@ package spreadsheet
 import (
 	"strings"
 
-	"github.com/getkawai/tools/gooxml/schema/soo/sml"
+	"github.com/yudaprama/tools/gooxml/schema/soo/sml"
 )
 
 type MergedCell struct {

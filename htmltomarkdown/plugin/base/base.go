@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"strings"
 
-	"github.com/getkawai/tools/htmltomarkdown/converter"
+	"github.com/yudaprama/tools/htmltomarkdown/converter"
 
 	"github.com/JohannesKaufmann/dom"
-	"github.com/getkawai/tools/htmltomarkdown/collapse"
-	"github.com/getkawai/tools/htmltomarkdown/internal/domutils"
-	"github.com/getkawai/tools/htmltomarkdown/internal/textutils"
+	"github.com/yudaprama/tools/htmltomarkdown/collapse"
+	"github.com/yudaprama/tools/htmltomarkdown/internal/domutils"
+	"github.com/yudaprama/tools/htmltomarkdown/internal/textutils"
 
 	"golang.org/x/net/html"
 )

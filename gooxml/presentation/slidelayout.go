@@ -8,7 +8,7 @@
 package presentation
 
 import (
-	"github.com/getkawai/tools/gooxml/schema/soo/pml"
+	"github.com/yudaprama/tools/gooxml/schema/soo/pml"
 )
 
 // SlideLayout

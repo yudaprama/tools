@@ -19,16 +19,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/getkawai/tools/gooxml"
-	"github.com/getkawai/tools/gooxml/common"
-	"github.com/getkawai/tools/gooxml/vmldrawing"
-	"github.com/getkawai/tools/gooxml/zippkg"
+	"github.com/yudaprama/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml/common"
+	"github.com/yudaprama/tools/gooxml/vmldrawing"
+	"github.com/yudaprama/tools/gooxml/zippkg"
 
-	"github.com/getkawai/tools/gooxml/schema/soo/dml"
-	crt "github.com/getkawai/tools/gooxml/schema/soo/dml/chart"
-	sd "github.com/getkawai/tools/gooxml/schema/soo/dml/spreadsheetDrawing"
-	"github.com/getkawai/tools/gooxml/schema/soo/pkg/relationships"
-	"github.com/getkawai/tools/gooxml/schema/soo/sml"
+	"github.com/yudaprama/tools/gooxml/schema/soo/dml"
+	crt "github.com/yudaprama/tools/gooxml/schema/soo/dml/chart"
+	sd "github.com/yudaprama/tools/gooxml/schema/soo/dml/spreadsheetDrawing"
+	"github.com/yudaprama/tools/gooxml/schema/soo/pkg/relationships"
+	"github.com/yudaprama/tools/gooxml/schema/soo/sml"
 )
 
 // ErrorNotFound is returned when something is not found

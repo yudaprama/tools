@@ -3,9 +3,9 @@ package base_test
 import (
 	"testing"
 
-	"github.com/getkawai/tools/htmltomarkdown/converter"
-	"github.com/getkawai/tools/htmltomarkdown/plugin/base"
-	"github.com/getkawai/tools/htmltomarkdown/plugin/commonmark"
+	"github.com/yudaprama/tools/htmltomarkdown/converter"
+	"github.com/yudaprama/tools/htmltomarkdown/plugin/base"
+	"github.com/yudaprama/tools/htmltomarkdown/plugin/commonmark"
 	"golang.org/x/net/html"
 )
 

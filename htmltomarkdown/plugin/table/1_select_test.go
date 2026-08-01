@@ -3,8 +3,8 @@ package table
 import (
 	"testing"
 
-	"github.com/getkawai/tools/htmltomarkdown/collapse"
-	"github.com/getkawai/tools/htmltomarkdown/internal/tester"
+	"github.com/yudaprama/tools/htmltomarkdown/collapse"
+	"github.com/yudaprama/tools/htmltomarkdown/internal/tester"
 	"golang.org/x/net/html"
 )
 

@@ -7,7 +7,7 @@
 
 package spreadsheet
 
-import "github.com/getkawai/tools/gooxml/schema/soo/sml"
+import "github.com/yudaprama/tools/gooxml/schema/soo/sml"
 
 // Comment is a single comment within a sheet.
 type Comment struct {

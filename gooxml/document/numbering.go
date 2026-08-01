@@ -8,9 +8,9 @@
 package document
 
 import (
-	"github.com/getkawai/tools/gooxml"
-	"github.com/getkawai/tools/gooxml/schema/soo/ofc/sharedTypes"
-	"github.com/getkawai/tools/gooxml/schema/soo/wml"
+	"github.com/yudaprama/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml/schema/soo/ofc/sharedTypes"
+	"github.com/yudaprama/tools/gooxml/schema/soo/wml"
 )
 
 // Numbering is the document wide numbering styles contained in numbering.xml.

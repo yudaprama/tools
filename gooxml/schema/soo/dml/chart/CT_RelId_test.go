@@ -13,7 +13,7 @@ import (
 	"encoding/xml"
 	"testing"
 
-	"github.com/getkawai/tools/gooxml/schema/soo/dml/chart"
+	"github.com/yudaprama/tools/gooxml/schema/soo/dml/chart"
 )
 
 func TestCT_RelIdConstructor(t *testing.T) {

@@ -13,7 +13,7 @@ import (
 	"encoding/xml"
 	"testing"
 
-	"github.com/getkawai/tools/gooxml/schema/urn/schemas_microsoft_com/vml"
+	"github.com/yudaprama/tools/gooxml/schema/urn/schemas_microsoft_com/vml"
 )
 
 func TestCT_StrokeConstructor(t *testing.T) {

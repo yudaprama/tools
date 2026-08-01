@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/getkawai/tools/gooxml/common"
-	"github.com/getkawai/tools/gooxml/document"
-	"github.com/getkawai/tools/gooxml/testhelper"
-	"github.com/getkawai/tools/gooxml/zippkg"
+	"github.com/yudaprama/tools/gooxml/common"
+	"github.com/yudaprama/tools/gooxml/document"
+	"github.com/yudaprama/tools/gooxml/testhelper"
+	"github.com/yudaprama/tools/gooxml/zippkg"
 )
 
 func TestMarshalCoreProperties(t *testing.T) {

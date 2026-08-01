@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/getkawai/tools/gooxml/document"
+	"github.com/yudaprama/tools/gooxml/document"
 )
 
 func main() {

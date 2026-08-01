@@ -15,8 +15,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/getkawai/tools/gooxml"
-	"github.com/getkawai/tools/gooxml/schema/soo/ofc/sharedTypes"
+	"github.com/yudaprama/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml/schema/soo/ofc/sharedTypes"
 )
 
 type CT_SharedUser struct {

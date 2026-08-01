@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/getkawai/unillm"
-	"github.com/getkawai/tools"
+	"github.com/yudaprama/tools"
 	"github.com/getkawai/database/db"
 )
 

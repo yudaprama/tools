@@ -13,7 +13,7 @@ import (
 	"encoding/xml"
 	"testing"
 
-	"github.com/getkawai/tools/gooxml/schema/soo/dml/picture"
+	"github.com/yudaprama/tools/gooxml/schema/soo/dml/picture"
 )
 
 func TestPicConstructor(t *testing.T) {

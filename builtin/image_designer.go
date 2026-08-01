@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/getkawai/tools"
-	"github.com/getkawai/tools/image"
+	"github.com/yudaprama/tools"
+	"github.com/yudaprama/tools/image"
 	"github.com/google/uuid"
 	"github.com/getkawai/unillm"
 )

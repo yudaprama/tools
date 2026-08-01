@@ -15,11 +15,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/getkawai/tools/gooxml"
-	"github.com/getkawai/tools/gooxml/common"
-	"github.com/getkawai/tools/gooxml/schema/soo/sml"
-	"github.com/getkawai/tools/gooxml/spreadsheet/format"
-	"github.com/getkawai/tools/gooxml/spreadsheet/reference"
+	"github.com/yudaprama/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml/common"
+	"github.com/yudaprama/tools/gooxml/schema/soo/sml"
+	"github.com/yudaprama/tools/gooxml/spreadsheet/format"
+	"github.com/yudaprama/tools/gooxml/spreadsheet/reference"
 )
 
 const iso8601Format = "2006-01-02T15:04:05Z07:00"

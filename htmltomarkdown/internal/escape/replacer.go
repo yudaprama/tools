@@ -1,6 +1,6 @@
 package escape
 
-import "github.com/getkawai/tools/htmltomarkdown/marker"
+import "github.com/yudaprama/tools/htmltomarkdown/marker"
 
 var placeholderRune rune = marker.MarkerEscaping
 

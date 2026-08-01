@@ -13,8 +13,8 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/getkawai/tools/gooxml"
-	"github.com/getkawai/tools/gooxml/zippkg"
+	"github.com/yudaprama/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml/zippkg"
 )
 
 // Read reads a document from an io.Reader.

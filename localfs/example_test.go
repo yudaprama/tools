@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/getkawai/tools/localfs"
+	"github.com/yudaprama/tools/localfs"
 )
 
 func ExampleService_WriteFile() {

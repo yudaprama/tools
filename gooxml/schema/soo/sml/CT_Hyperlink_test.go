@@ -13,7 +13,7 @@ import (
 	"encoding/xml"
 	"testing"
 
-	"github.com/getkawai/tools/gooxml/schema/soo/sml"
+	"github.com/yudaprama/tools/gooxml/schema/soo/sml"
 )
 
 func TestCT_HyperlinkConstructor(t *testing.T) {

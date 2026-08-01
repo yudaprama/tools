@@ -13,7 +13,7 @@ import (
 	"encoding/xml"
 	"time"
 
-	"github.com/getkawai/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml"
 )
 
 type CoreProperties struct {

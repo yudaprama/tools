@@ -14,7 +14,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/getkawai/tools/gooxml/schema/soo/ofc/sharedTypes"
+	"github.com/yudaprama/tools/gooxml/schema/soo/ofc/sharedTypes"
 )
 
 type CT_WriteProtection struct {

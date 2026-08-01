@@ -8,9 +8,9 @@
 package presentation
 
 import (
-	"github.com/getkawai/tools/gooxml/drawing"
-	"github.com/getkawai/tools/gooxml/schema/soo/dml"
-	"github.com/getkawai/tools/gooxml/schema/soo/pml"
+	"github.com/yudaprama/tools/gooxml/drawing"
+	"github.com/yudaprama/tools/gooxml/schema/soo/dml"
+	"github.com/yudaprama/tools/gooxml/schema/soo/pml"
 )
 
 // TextBox is a text box within a slide.

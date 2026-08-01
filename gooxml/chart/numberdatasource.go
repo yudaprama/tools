@@ -10,7 +10,7 @@ package chart
 import (
 	"fmt"
 
-	crt "github.com/getkawai/tools/gooxml/schema/soo/dml/chart"
+	crt "github.com/yudaprama/tools/gooxml/schema/soo/dml/chart"
 )
 
 type NumberDataSource struct {

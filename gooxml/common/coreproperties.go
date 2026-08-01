@@ -11,8 +11,8 @@ import (
 	"encoding/xml"
 	"time"
 
-	"github.com/getkawai/tools/gooxml"
-	"github.com/getkawai/tools/gooxml/schema/soo/pkg/metadata/core_properties"
+	"github.com/yudaprama/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml/schema/soo/pkg/metadata/core_properties"
 )
 
 // CoreProperties contains document specific properties.

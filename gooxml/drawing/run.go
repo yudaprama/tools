@@ -7,7 +7,7 @@
 
 package drawing
 
-import "github.com/getkawai/tools/gooxml/schema/soo/dml"
+import "github.com/yudaprama/tools/gooxml/schema/soo/dml"
 
 // MakeRun constructs a new Run wrapper.
 func MakeRun(x *dml.EG_TextRun) Run {

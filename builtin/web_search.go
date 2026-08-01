@@ -7,8 +7,8 @@ import (
 	"log"
 
 	"github.com/getkawai/unillm"
-	"github.com/getkawai/tools"
-	"github.com/getkawai/tools/search"
+	"github.com/yudaprama/tools"
+	"github.com/yudaprama/tools/search"
 )
 
 // WebSearchInput defines input for web search tool

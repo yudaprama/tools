@@ -13,7 +13,7 @@ import (
 	"encoding/xml"
 	"testing"
 
-	"github.com/getkawai/tools/gooxml/schema/soo/ofc/math"
+	"github.com/yudaprama/tools/gooxml/schema/soo/ofc/math"
 )
 
 func TestCT_NaryPrConstructor(t *testing.T) {

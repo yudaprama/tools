@@ -13,8 +13,8 @@ import (
 	"encoding/xml"
 	"fmt"
 
-	"github.com/getkawai/tools/gooxml"
-	"github.com/getkawai/tools/gooxml/schema/soo/ofc/math"
+	"github.com/yudaprama/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml/schema/soo/ofc/math"
 )
 
 type CT_SdtContentCell struct {

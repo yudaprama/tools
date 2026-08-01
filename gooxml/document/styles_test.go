@@ -7,9 +7,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/getkawai/tools/gooxml/document"
-	"github.com/getkawai/tools/gooxml/testhelper"
-	"github.com/getkawai/tools/gooxml/zippkg"
+	"github.com/yudaprama/tools/gooxml/document"
+	"github.com/yudaprama/tools/gooxml/testhelper"
+	"github.com/yudaprama/tools/gooxml/zippkg"
 )
 
 func TestStylesUnmarshal(t *testing.T) {

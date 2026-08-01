@@ -15,7 +15,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/getkawai/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml"
 )
 
 type CT_ParaRPrChange struct {

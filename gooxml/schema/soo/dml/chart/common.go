@@ -14,7 +14,7 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/getkawai/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml"
 )
 
 const ST_HPercentWithSymbolPattern = `0*(([5-9])|([1-9][0-9])|([1-4][0-9][0-9])|500)%`

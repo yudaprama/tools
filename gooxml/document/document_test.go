@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/getkawai/tools/gooxml/document"
+	"github.com/yudaprama/tools/gooxml/document"
 )
 
 func TestToMarkdown(t *testing.T) {

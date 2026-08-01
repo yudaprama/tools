@@ -13,7 +13,7 @@ import (
 	"encoding/xml"
 	"testing"
 
-	"github.com/getkawai/tools/gooxml/schema/soo/dml/spreadsheetDrawing"
+	"github.com/yudaprama/tools/gooxml/schema/soo/dml/spreadsheetDrawing"
 )
 
 func TestEG_ObjectChoicesChoiceConstructor(t *testing.T) {

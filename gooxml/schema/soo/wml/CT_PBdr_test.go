@@ -13,7 +13,7 @@ import (
 	"encoding/xml"
 	"testing"
 
-	"github.com/getkawai/tools/gooxml/schema/soo/wml"
+	"github.com/yudaprama/tools/gooxml/schema/soo/wml"
 )
 
 func TestCT_PBdrConstructor(t *testing.T) {

@@ -8,10 +8,10 @@
 package chart
 
 import (
-	"github.com/getkawai/tools/gooxml"
-	"github.com/getkawai/tools/gooxml/drawing"
-	"github.com/getkawai/tools/gooxml/schema/soo/dml"
-	crt "github.com/getkawai/tools/gooxml/schema/soo/dml/chart"
+	"github.com/yudaprama/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml/drawing"
+	"github.com/yudaprama/tools/gooxml/schema/soo/dml"
+	crt "github.com/yudaprama/tools/gooxml/schema/soo/dml/chart"
 )
 
 // Surface3DChart is a 3D view of a surface chart.

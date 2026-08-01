@@ -5,9 +5,9 @@ import (
 	"regexp"
 
 	"github.com/JohannesKaufmann/dom"
-	"github.com/getkawai/tools/htmltomarkdown/converter"
-	"github.com/getkawai/tools/htmltomarkdown/internal/textutils"
-	"github.com/getkawai/tools/htmltomarkdown/marker"
+	"github.com/yudaprama/tools/htmltomarkdown/converter"
+	"github.com/yudaprama/tools/htmltomarkdown/internal/textutils"
+	"github.com/yudaprama/tools/htmltomarkdown/marker"
 	"golang.org/x/net/html"
 )
 

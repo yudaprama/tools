@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/JohannesKaufmann/dom"
-	"github.com/getkawai/tools/htmltomarkdown/internal/tester"
+	"github.com/yudaprama/tools/htmltomarkdown/internal/tester"
 	"golang.org/x/net/html"
 )
 

@@ -9,11 +9,11 @@ import (
 	"time"
 
 	"github.com/andybalholm/brotli"
-	"github.com/getkawai/tools/htmltomarkdown/converter"
-	"github.com/getkawai/tools/htmltomarkdown/internal/domutils"
-	"github.com/getkawai/tools/htmltomarkdown/internal/textutils"
-	"github.com/getkawai/tools/htmltomarkdown/plugin/base"
-	"github.com/getkawai/tools/htmltomarkdown/plugin/commonmark"
+	"github.com/yudaprama/tools/htmltomarkdown/converter"
+	"github.com/yudaprama/tools/htmltomarkdown/internal/domutils"
+	"github.com/yudaprama/tools/htmltomarkdown/internal/textutils"
+	"github.com/yudaprama/tools/htmltomarkdown/plugin/base"
+	"github.com/yudaprama/tools/htmltomarkdown/plugin/commonmark"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/charset"
 )

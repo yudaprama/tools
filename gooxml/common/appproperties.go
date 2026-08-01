@@ -12,8 +12,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/getkawai/tools/gooxml"
-	"github.com/getkawai/tools/gooxml/schema/soo/ofc/extended_properties"
+	"github.com/yudaprama/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml/schema/soo/ofc/extended_properties"
 )
 
 // AppProperties contains properties specific to the document and the

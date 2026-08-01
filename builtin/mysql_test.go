@@ -6,7 +6,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/getkawai/tools"
+	"github.com/yudaprama/tools"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

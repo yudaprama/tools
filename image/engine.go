@@ -86,5 +86,5 @@ func (s *StableDiffusion) CheckInstalledModels() ([]string, error) {
 
 // CreateImageWithOptions currently requires external backend integration.
 func (s *StableDiffusion) CreateImageWithOptions(opts GenerationOptions) error {
-	return fmt.Errorf("stable diffusion backend not configured in github.com/getkawai/tools/image")
+	return fmt.Errorf("stable diffusion backend not configured in github.com/yudaprama/tools/image")
 }

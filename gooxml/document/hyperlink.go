@@ -8,9 +8,9 @@
 package document
 
 import (
-	"github.com/getkawai/tools/gooxml"
-	"github.com/getkawai/tools/gooxml/common"
-	"github.com/getkawai/tools/gooxml/schema/soo/wml"
+	"github.com/yudaprama/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml/common"
+	"github.com/yudaprama/tools/gooxml/schema/soo/wml"
 )
 
 // HyperLink is a link within a document.

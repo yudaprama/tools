@@ -6,7 +6,7 @@ import (
 
 	"github.com/Knetic/govaluate"
 	"github.com/getkawai/unillm"
-	"github.com/getkawai/tools"
+	"github.com/yudaprama/tools"
 )
 
 // CalculatorInput defines input for calculator tool

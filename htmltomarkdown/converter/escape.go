@@ -3,7 +3,7 @@ package converter
 import (
 	"unicode/utf8"
 
-	"github.com/getkawai/tools/htmltomarkdown/marker"
+	"github.com/yudaprama/tools/htmltomarkdown/marker"
 )
 
 const (

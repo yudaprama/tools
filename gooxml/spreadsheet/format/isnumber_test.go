@@ -10,7 +10,7 @@ package format_test
 import (
 	"testing"
 
-	"github.com/getkawai/tools/gooxml/spreadsheet/format"
+	"github.com/yudaprama/tools/gooxml/spreadsheet/format"
 )
 
 func TestIsNumber(t *testing.T) {

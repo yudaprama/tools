@@ -11,13 +11,13 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/getkawai/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml"
 
-	"github.com/getkawai/tools/gooxml/common"
-	"github.com/getkawai/tools/gooxml/measurement"
-	"github.com/getkawai/tools/gooxml/schema/soo/dml"
+	"github.com/yudaprama/tools/gooxml/common"
+	"github.com/yudaprama/tools/gooxml/measurement"
+	"github.com/yudaprama/tools/gooxml/schema/soo/dml"
 
-	"github.com/getkawai/tools/gooxml/schema/soo/pml"
+	"github.com/yudaprama/tools/gooxml/schema/soo/pml"
 )
 
 type Slide struct {

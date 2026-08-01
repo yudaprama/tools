@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/getkawai/unillm"
-	"github.com/getkawai/tools"
-	"github.com/getkawai/tools/search"
+	"github.com/yudaprama/tools"
+	"github.com/yudaprama/tools/search"
 )
 
 // ============================================================================

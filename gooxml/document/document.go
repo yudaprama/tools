@@ -19,15 +19,15 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/getkawai/tools/gooxml"
-	"github.com/getkawai/tools/gooxml/common"
-	"github.com/getkawai/tools/gooxml/zippkg"
+	"github.com/yudaprama/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml/common"
+	"github.com/yudaprama/tools/gooxml/zippkg"
 
-	"github.com/getkawai/tools/gooxml/schema/soo/dml"
-	pic "github.com/getkawai/tools/gooxml/schema/soo/dml/picture"
-	st "github.com/getkawai/tools/gooxml/schema/soo/ofc/sharedTypes"
-	"github.com/getkawai/tools/gooxml/schema/soo/pkg/relationships"
-	"github.com/getkawai/tools/gooxml/schema/soo/wml"
+	"github.com/yudaprama/tools/gooxml/schema/soo/dml"
+	pic "github.com/yudaprama/tools/gooxml/schema/soo/dml/picture"
+	st "github.com/yudaprama/tools/gooxml/schema/soo/ofc/sharedTypes"
+	"github.com/yudaprama/tools/gooxml/schema/soo/pkg/relationships"
+	"github.com/yudaprama/tools/gooxml/schema/soo/wml"
 )
 
 // Document is a text document that can be written out in the OOXML .docx

@@ -1,7 +1,7 @@
 package search
 
 import (
-	"github.com/getkawai/tools/htmltomarkdown"
+	"github.com/yudaprama/tools/htmltomarkdown"
 )
 
 // SearchParams represents optional search parameters

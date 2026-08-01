@@ -13,13 +13,13 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/getkawai/tools/gooxml/spreadsheet/formula"
-	"github.com/getkawai/tools/gooxml/spreadsheet/reference"
+	"github.com/yudaprama/tools/gooxml/spreadsheet/formula"
+	"github.com/yudaprama/tools/gooxml/spreadsheet/reference"
 
-	"github.com/getkawai/tools/gooxml"
-	"github.com/getkawai/tools/gooxml/common"
-	"github.com/getkawai/tools/gooxml/schema/soo/sml"
-	"github.com/getkawai/tools/gooxml/vmldrawing"
+	"github.com/yudaprama/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml/common"
+	"github.com/yudaprama/tools/gooxml/schema/soo/sml"
+	"github.com/yudaprama/tools/gooxml/vmldrawing"
 )
 
 // Sheet is a single sheet within a workbook.

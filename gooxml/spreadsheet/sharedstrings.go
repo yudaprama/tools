@@ -9,8 +9,8 @@ package spreadsheet
 import (
 	"fmt"
 
-	"github.com/getkawai/tools/gooxml"
-	"github.com/getkawai/tools/gooxml/schema/soo/sml"
+	"github.com/yudaprama/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml/schema/soo/sml"
 )
 
 // SharedStrings is a shared strings table, where string data can be placed

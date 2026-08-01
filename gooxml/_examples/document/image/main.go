@@ -4,11 +4,11 @@ package main
 import (
 	"log"
 
-	"github.com/getkawai/tools/gooxml/common"
-	"github.com/getkawai/tools/gooxml/document"
-	"github.com/getkawai/tools/gooxml/measurement"
+	"github.com/yudaprama/tools/gooxml/common"
+	"github.com/yudaprama/tools/gooxml/document"
+	"github.com/yudaprama/tools/gooxml/measurement"
 
-	"github.com/getkawai/tools/gooxml/schema/soo/wml"
+	"github.com/yudaprama/tools/gooxml/schema/soo/wml"
 )
 
 var lorem = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin lobortis, lectus dictum feugiat tempus, sem neque finibus enim, sed eleifend sem nunc ac diam. Vestibulum tempus sagittis elementum`

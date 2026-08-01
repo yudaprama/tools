@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/getkawai/tools/gooxml/color"
-	"github.com/getkawai/tools/gooxml/schema/soo/pml"
+	"github.com/yudaprama/tools/gooxml/color"
+	"github.com/yudaprama/tools/gooxml/schema/soo/pml"
 
-	"github.com/getkawai/tools/gooxml/presentation"
+	"github.com/yudaprama/tools/gooxml/presentation"
 )
 
 func main() {
@@ -32,7 +32,7 @@ func main() {
 	ph, _ := sld.GetPlaceholder(pml.ST_PlaceholderTypeTitle)
 	ph.SetText("Using gooxml")
 	ph, _ = sld.GetPlaceholder(pml.ST_PlaceholderTypeBody)
-	ph.SetText("Created with github.com/getkawai/tools/gooxml/")
+	ph.SetText("Created with github.com/yudaprama/tools/gooxml/")
 
 	tac, _ := ppt.GetLayoutByName("Title and Content")
 

@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"strings"
 
-	"github.com/getkawai/tools/htmltomarkdown/converter"
-	"github.com/getkawai/tools/htmltomarkdown/internal/domutils"
-	"github.com/getkawai/tools/htmltomarkdown/internal/escape"
-	"github.com/getkawai/tools/htmltomarkdown/marker"
+	"github.com/yudaprama/tools/htmltomarkdown/converter"
+	"github.com/yudaprama/tools/htmltomarkdown/internal/domutils"
+	"github.com/yudaprama/tools/htmltomarkdown/internal/escape"
+	"github.com/yudaprama/tools/htmltomarkdown/marker"
 	"golang.org/x/net/html"
 )
 

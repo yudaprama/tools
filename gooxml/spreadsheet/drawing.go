@@ -10,16 +10,16 @@ package spreadsheet
 import (
 	"fmt"
 
-	"github.com/getkawai/tools/gooxml"
-	"github.com/getkawai/tools/gooxml/chart"
-	"github.com/getkawai/tools/gooxml/color"
-	"github.com/getkawai/tools/gooxml/common"
-	"github.com/getkawai/tools/gooxml/measurement"
+	"github.com/yudaprama/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml/chart"
+	"github.com/yudaprama/tools/gooxml/color"
+	"github.com/yudaprama/tools/gooxml/common"
+	"github.com/yudaprama/tools/gooxml/measurement"
 
-	"github.com/getkawai/tools/gooxml/schema/soo/dml"
-	c "github.com/getkawai/tools/gooxml/schema/soo/dml/chart"
-	crt "github.com/getkawai/tools/gooxml/schema/soo/dml/chart"
-	sd "github.com/getkawai/tools/gooxml/schema/soo/dml/spreadsheetDrawing"
+	"github.com/yudaprama/tools/gooxml/schema/soo/dml"
+	c "github.com/yudaprama/tools/gooxml/schema/soo/dml/chart"
+	crt "github.com/yudaprama/tools/gooxml/schema/soo/dml/chart"
+	sd "github.com/yudaprama/tools/gooxml/schema/soo/dml/spreadsheetDrawing"
 )
 
 // Drawing is a drawing overlay on a sheet.  Only a single drawing is allowed

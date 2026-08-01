@@ -8,8 +8,8 @@
 package document
 
 import (
-	st "github.com/getkawai/tools/gooxml/schema/soo/ofc/sharedTypes"
-	"github.com/getkawai/tools/gooxml/schema/soo/wml"
+	st "github.com/yudaprama/tools/gooxml/schema/soo/ofc/sharedTypes"
+	"github.com/yudaprama/tools/gooxml/schema/soo/wml"
 )
 
 // TableLook is the conditional formatting associated with a table style that

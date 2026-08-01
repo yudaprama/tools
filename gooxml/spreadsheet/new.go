@@ -10,9 +10,9 @@ package spreadsheet
 import (
 	"runtime"
 
-	"github.com/getkawai/tools/gooxml"
-	"github.com/getkawai/tools/gooxml/common"
-	"github.com/getkawai/tools/gooxml/schema/soo/sml"
+	"github.com/yudaprama/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml/common"
+	"github.com/yudaprama/tools/gooxml/schema/soo/sml"
 )
 
 // New constructs a new workbook.

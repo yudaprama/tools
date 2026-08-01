@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/getkawai/tools/htmltomarkdown"
-	"github.com/getkawai/tools/htmltomarkdown/converter"
+	"github.com/yudaprama/tools/htmltomarkdown"
+	"github.com/yudaprama/tools/htmltomarkdown/converter"
 )
 
 // Crawler handles web page crawling

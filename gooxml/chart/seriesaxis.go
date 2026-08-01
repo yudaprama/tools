@@ -7,7 +7,7 @@
 
 package chart
 
-import crt "github.com/getkawai/tools/gooxml/schema/soo/dml/chart"
+import crt "github.com/yudaprama/tools/gooxml/schema/soo/dml/chart"
 
 type SeriesAxis struct {
 	x *crt.CT_SerAx

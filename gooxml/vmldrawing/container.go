@@ -10,7 +10,7 @@ package vmldrawing
 import (
 	"encoding/xml"
 
-	"github.com/getkawai/tools/gooxml/schema/urn/schemas_microsoft_com/vml"
+	"github.com/yudaprama/tools/gooxml/schema/urn/schemas_microsoft_com/vml"
 )
 
 type Container struct {

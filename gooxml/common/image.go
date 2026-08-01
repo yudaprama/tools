@@ -12,13 +12,13 @@ import (
 	"image"
 	"os"
 
-	"github.com/getkawai/tools/gooxml/measurement"
+	"github.com/yudaprama/tools/gooxml/measurement"
 	// Add image format support
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
 
-	"github.com/getkawai/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml"
 )
 
 // Image is a container for image information. It's used as we need format and

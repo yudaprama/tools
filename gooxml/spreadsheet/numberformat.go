@@ -7,7 +7,7 @@
 
 package spreadsheet
 
-import "github.com/getkawai/tools/gooxml/schema/soo/sml"
+import "github.com/yudaprama/tools/gooxml/schema/soo/sml"
 
 // NumberFormat is a number formatting string that can be applied to a cell
 // style.

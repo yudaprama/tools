@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	htmltomarkdown "github.com/getkawai/tools/htmltomarkdown"
+	htmltomarkdown "github.com/yudaprama/tools/htmltomarkdown"
 )
 
 func main() {

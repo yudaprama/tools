@@ -13,7 +13,7 @@ import (
 	"encoding/xml"
 	"testing"
 
-	"github.com/getkawai/tools/gooxml/schema/soo/dml/diagram"
+	"github.com/yudaprama/tools/gooxml/schema/soo/dml/diagram"
 )
 
 func TestCT_DiagramDefinitionHeaderLstConstructor(t *testing.T) {

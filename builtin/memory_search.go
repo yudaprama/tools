@@ -7,7 +7,7 @@ import (
 	"log"
 
 	"github.com/getkawai/unillm"
-	"github.com/getkawai/tools"
+	"github.com/yudaprama/tools"
 )
 
 // MemorySearchInput defines input for memory search tool

@@ -4,12 +4,12 @@ package main
 import (
 	"log"
 
-	"github.com/getkawai/tools/gooxml/schema/soo/dml"
+	"github.com/yudaprama/tools/gooxml/schema/soo/dml"
 
-	"github.com/getkawai/tools/gooxml/color"
-	"github.com/getkawai/tools/gooxml/common"
-	"github.com/getkawai/tools/gooxml/measurement"
-	"github.com/getkawai/tools/gooxml/presentation"
+	"github.com/yudaprama/tools/gooxml/color"
+	"github.com/yudaprama/tools/gooxml/common"
+	"github.com/yudaprama/tools/gooxml/measurement"
+	"github.com/yudaprama/tools/gooxml/presentation"
 )
 
 const lorem = "Lorem ipsum dolor sit amet."

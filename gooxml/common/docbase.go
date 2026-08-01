@@ -12,7 +12,7 @@ import (
 	"fmt"
 	"image"
 
-	"github.com/getkawai/tools/gooxml/zippkg"
+	"github.com/yudaprama/tools/gooxml/zippkg"
 )
 
 // DocBase is the type embedded in in the Document/Workbook/Presentation types

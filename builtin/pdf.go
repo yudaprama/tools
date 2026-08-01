@@ -13,7 +13,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/getkawai/tools"
+	"github.com/yudaprama/tools"
 	"github.com/getkawai/unillm"
 	"github.com/kawai-network/x/pdf/core"
 	pdfextractor "github.com/kawai-network/x/pdf/extractor"

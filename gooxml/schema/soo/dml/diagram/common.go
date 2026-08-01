@@ -13,7 +13,7 @@ import (
 	"encoding/xml"
 	"fmt"
 
-	"github.com/getkawai/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml"
 )
 
 func ParseUnionST_ModelId(s string) (ST_ModelId, error) {

@@ -8,9 +8,9 @@
 package chart
 
 import (
-	"github.com/getkawai/tools/gooxml/drawing"
-	"github.com/getkawai/tools/gooxml/schema/soo/dml"
-	crt "github.com/getkawai/tools/gooxml/schema/soo/dml/chart"
+	"github.com/yudaprama/tools/gooxml/drawing"
+	"github.com/yudaprama/tools/gooxml/schema/soo/dml"
+	crt "github.com/yudaprama/tools/gooxml/schema/soo/dml/chart"
 )
 
 // ScatterChartSeries is the data series for a scatter chart.

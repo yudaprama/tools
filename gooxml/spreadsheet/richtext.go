@@ -7,7 +7,7 @@
 
 package spreadsheet
 
-import "github.com/getkawai/tools/gooxml/schema/soo/sml"
+import "github.com/yudaprama/tools/gooxml/schema/soo/sml"
 
 // RichText is a container for the rich text within a cell. It's similar to a
 // paragaraph for a document, except a cell can only contain one rich text item.

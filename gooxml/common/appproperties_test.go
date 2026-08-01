@@ -13,9 +13,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/getkawai/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml"
 
-	"github.com/getkawai/tools/gooxml/common"
+	"github.com/yudaprama/tools/gooxml/common"
 )
 
 func TestNewAppDefaultProperties(t *testing.T) {

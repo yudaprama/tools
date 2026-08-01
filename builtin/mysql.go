@@ -13,7 +13,7 @@ import (
 
 	_ "github.com/duckdb/duckdb-go/v2"
 	"github.com/getkawai/unillm"
-	"github.com/getkawai/tools"
+	"github.com/yudaprama/tools"
 )
 
 // MySQLService manages MySQL connections via DuckDB

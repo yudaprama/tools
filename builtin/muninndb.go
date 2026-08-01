@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/getkawai/tools"
+	"github.com/yudaprama/tools"
 	"github.com/getkawai/unillm"
 	"github.com/kawai-network/y/paths"
 	"github.com/scrypster/muninndb/pkg/embedded"

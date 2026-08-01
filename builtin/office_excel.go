@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/getkawai/unillm"
-	"github.com/getkawai/tools"
-	"github.com/getkawai/tools/gooxml/spreadsheet"
+	"github.com/yudaprama/tools"
+	"github.com/yudaprama/tools/gooxml/spreadsheet"
 )
 
 // -- Data Structures --

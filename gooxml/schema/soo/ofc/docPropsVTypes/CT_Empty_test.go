@@ -13,7 +13,7 @@ import (
 	"encoding/xml"
 	"testing"
 
-	"github.com/getkawai/tools/gooxml/schema/soo/ofc/docPropsVTypes"
+	"github.com/yudaprama/tools/gooxml/schema/soo/ofc/docPropsVTypes"
 )
 
 func TestCT_EmptyConstructor(t *testing.T) {

@@ -12,7 +12,7 @@ package content_types
 import (
 	"regexp"
 
-	"github.com/getkawai/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml"
 )
 
 const ST_ContentTypePattern = `^\p{Latin}+/.*$`

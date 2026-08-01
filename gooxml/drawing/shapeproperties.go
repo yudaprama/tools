@@ -8,11 +8,11 @@
 package drawing
 
 import (
-	"github.com/getkawai/tools/gooxml"
-	"github.com/getkawai/tools/gooxml/color"
-	"github.com/getkawai/tools/gooxml/measurement"
+	"github.com/yudaprama/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml/color"
+	"github.com/yudaprama/tools/gooxml/measurement"
 
-	"github.com/getkawai/tools/gooxml/schema/soo/dml"
+	"github.com/yudaprama/tools/gooxml/schema/soo/dml"
 )
 
 type ShapeProperties struct {

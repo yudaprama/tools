@@ -7,7 +7,7 @@
 
 package document
 
-import "github.com/getkawai/tools/gooxml/schema/soo/wml"
+import "github.com/yudaprama/tools/gooxml/schema/soo/wml"
 
 // TableConditionalFormatting controls the conditional formatting within a table
 // style.

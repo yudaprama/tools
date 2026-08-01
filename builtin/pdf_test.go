@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/getkawai/tools"
+	"github.com/yudaprama/tools"
 	"github.com/getkawai/unillm"
 	pdfcreator "github.com/kawai-network/x/pdf/creator"
 	"github.com/stretchr/testify/assert"

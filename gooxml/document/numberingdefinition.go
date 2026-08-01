@@ -7,7 +7,7 @@
 
 package document
 
-import "github.com/getkawai/tools/gooxml/schema/soo/wml"
+import "github.com/yudaprama/tools/gooxml/schema/soo/wml"
 
 // NumberingDefinition defines a numbering definition for a list of pragraphs.
 type NumberingDefinition struct {

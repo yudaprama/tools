@@ -8,7 +8,7 @@
 package zippkg_test
 
 import "testing"
-import "github.com/getkawai/tools/gooxml/zippkg"
+import "github.com/yudaprama/tools/gooxml/zippkg"
 
 func TestRelsPathFor(t *testing.T) {
 	td := []struct {

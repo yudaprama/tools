@@ -7,9 +7,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/getkawai/tools/gooxml/schema/soo/wml"
-	"github.com/getkawai/tools/gooxml/testhelper"
-	"github.com/getkawai/tools/gooxml/zippkg"
+	"github.com/yudaprama/tools/gooxml/schema/soo/wml"
+	"github.com/yudaprama/tools/gooxml/testhelper"
+	"github.com/yudaprama/tools/gooxml/zippkg"
 )
 
 func TestSettingsUnmarshal(t *testing.T) {

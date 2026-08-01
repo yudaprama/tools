@@ -13,7 +13,7 @@ import (
 	"encoding/xml"
 	"testing"
 
-	"github.com/getkawai/tools/gooxml/schema/soo/pml"
+	"github.com/yudaprama/tools/gooxml/schema/soo/pml"
 )
 
 func TestEG_TopLevelSlideConstructor(t *testing.T) {

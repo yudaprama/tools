@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/getkawai/tools"
+	"github.com/yudaprama/tools"
 )
 
 // RegisterAll registers all builtin tools

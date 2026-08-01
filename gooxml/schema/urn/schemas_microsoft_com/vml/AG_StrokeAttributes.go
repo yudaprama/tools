@@ -14,7 +14,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/getkawai/tools/gooxml/schema/soo/ofc/sharedTypes"
+	"github.com/yudaprama/tools/gooxml/schema/soo/ofc/sharedTypes"
 )
 
 type AG_StrokeAttributes struct {

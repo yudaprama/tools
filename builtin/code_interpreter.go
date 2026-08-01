@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/getkawai/unillm"
-	"github.com/getkawai/tools"
+	"github.com/yudaprama/tools"
 )
 
 // PythonCodeInput defines input for code interpreter tool

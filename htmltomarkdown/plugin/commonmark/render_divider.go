@@ -1,7 +1,7 @@
 package commonmark
 
 import (
-	"github.com/getkawai/tools/htmltomarkdown/converter"
+	"github.com/yudaprama/tools/htmltomarkdown/converter"
 	"golang.org/x/net/html"
 )
 

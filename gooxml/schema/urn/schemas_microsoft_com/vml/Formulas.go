@@ -12,7 +12,7 @@ package vml
 import (
 	"encoding/xml"
 
-	"github.com/getkawai/tools/gooxml"
+	"github.com/yudaprama/tools/gooxml"
 )
 
 type Formulas struct {
