@@ -105,6 +105,7 @@ func (c ContentTypes) RemoveOverride(path string) {
 		if ovr.PartNameAttr == path {
 			copy(c.x.Override[i:], c.x.Override[i+1:])
 			c.x.Override = c.x.Override[0 : len(c.x.Override)-1]
+			return
 		}
 	}
 }
