@@ -1,0 +1,23 @@
+gooxml/presentation/presentation.go
+  s_40dbea608198b8::t_0d633182a79ef5 644,660,664
+gooxml/document/paragraph.go
+  s_40dbea608198b8::t_620cc12d87a510 38,45
+gooxml/common/contenttypes.go
+  s_40dbea608198b8::t_b7b6d5ba044811 108
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.19",
+  "base_commit_sha": "af1778e313ff7c9ba2161611f98eb7e1dab5a7bf",
+  "prompts": {},
+  "sessions": {
+    "s_40dbea608198b8": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_0412c6ba7ffensCFgGD7izclO2",
+        "model": "mimo-v2.5-free"
+      },
+      "human_author": "yudaprama <yudhaprama@icloud.com>"
+    }
+  }
+}
