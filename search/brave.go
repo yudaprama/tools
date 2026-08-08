@@ -1,11 +1,9 @@
 package search
 
 import (
-	"compress/gzip"
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"time"
@@ -74,42 +72,20 @@ func (p *BraveProvider) Query(ctx context.Context, query string, params *SearchP
 
 	fullURL := fmt.Sprintf("%s?%s", endpoint, queryParams.Encode())
 
-	// Create request
-	req, err := http.NewRequestWithContext(ctx, "GET", fullURL, nil)
+	req, err := newGetRequest(ctx, fullURL, map[string]string{
+		"Accept-Encoding":      "gzip",
+		"X-Subscription-Token": p.apiKey,
+	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
+		return nil, err
 	}
 
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Accept-Encoding", "gzip")
-	req.Header.Set("X-Subscription-Token", p.apiKey)
-
-	// Execute request
 	startTime := time.Now()
-	resp, err := p.httpClient.Do(req)
+	reader, cleanup, err := httpDo(ctx, p.httpClient, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to execute request: %w", err)
+		return nil, err
 	}
-	defer func() { _ = resp.Body.Close() }()
-
-	costTime := time.Since(startTime).Milliseconds()
-
-	// Check response status
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("brave API returned status %d: %s", resp.StatusCode, string(body))
-	}
-
-	// Handle gzip encoding
-	var reader io.Reader = resp.Body
-	if resp.Header.Get("Content-Encoding") == "gzip" {
-		gzReader, err := gzip.NewReader(resp.Body)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create gzip reader: %w", err)
-		}
-		defer func() { _ = gzReader.Close() }()
-		reader = gzReader
-	}
+	defer cleanup()
 
 	// Parse response
 	var braveResp BraveResponse
@@ -120,16 +96,11 @@ func (p *BraveProvider) Query(ctx context.Context, query string, params *SearchP
 	// Convert to uniform format
 	results := make([]UniformSearchResult, 0, len(braveResp.Web.Results))
 	for _, result := range braveResp.Web.Results {
-		parsedURL := ""
-		if u, err := url.Parse(result.URL); err == nil {
-			parsedURL = u.Hostname()
-		}
-
 		results = append(results, UniformSearchResult{
 			Category:  "general",
 			Content:   result.Description,
 			Engines:   []string{"brave"},
-			ParsedUrl: parsedURL,
+			ParsedUrl: hostnameFromURL(result.URL),
 			Score:     1.0,
 			Title:     result.Title,
 			URL:       result.URL,
@@ -137,7 +108,7 @@ func (p *BraveProvider) Query(ctx context.Context, query string, params *SearchP
 	}
 
 	return &UniformSearchResponse{
-		CostTime:      costTime,
+		CostTime:      elapsed(startTime),
 		Query:         query,
 		ResultNumbers: len(results),
 		Results:       results,

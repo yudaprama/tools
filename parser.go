@@ -21,6 +21,31 @@ func argsToJSON(args map[string]string) string {
 	return string(b)
 }
 
+// toStringMap converts a map[string]interface{} to map[string]string,
+// coercing each value to its string representation.
+func toStringMap(raw map[string]interface{}) map[string]string {
+	out := make(map[string]string, len(raw))
+	for k, v := range raw {
+		switch val := v.(type) {
+		case string:
+			out[k] = val
+		case float64:
+			out[k] = fmt.Sprintf("%v", val)
+		case int:
+			out[k] = fmt.Sprintf("%d", val)
+		case bool:
+			out[k] = fmt.Sprintf("%v", val)
+		default:
+			if b, err := json.Marshal(val); err == nil {
+				out[k] = string(b)
+			} else {
+				out[k] = fmt.Sprintf("%v", val)
+			}
+		}
+	}
+	return out
+}
+
 // ParseToolCalls parses tool calls from an LLM response (for models without
 // native function-calling). Supports multiple formats:
 //  1. <tool_call>{"name": "...", "arguments": {...}}</tool_call>
@@ -97,19 +122,7 @@ func parsePureJSONToolFormat(response string) []schema.ToolCall {
 						params = toolCall.Arguments
 					}
 
-					args := make(map[string]string)
-					for k, v := range params {
-						switch val := v.(type) {
-						case string:
-							args[k] = val
-						case float64:
-							args[k] = fmt.Sprintf("%v", val)
-						case int:
-							args[k] = fmt.Sprintf("%d", val)
-						default:
-							args[k] = fmt.Sprintf("%v", val)
-						}
-					}
+					args := toStringMap(params)
 
 					if len(args) > 0 {
 						calls = append(calls, newToolCall(toolCall.Name, argsToJSON(args)))
@@ -168,19 +181,7 @@ func parseInlineJSONToolFormat(response string) []schema.ToolCall {
 
 			var rawArgs map[string]interface{}
 			if err := json.Unmarshal([]byte(jsonContent), &rawArgs); err == nil {
-				args = make(map[string]string)
-				for k, v := range rawArgs {
-					switch val := v.(type) {
-					case string:
-						args[k] = val
-					case float64:
-						args[k] = fmt.Sprintf("%v", val)
-					case int:
-						args[k] = fmt.Sprintf("%d", val)
-					default:
-						args[k] = fmt.Sprintf("%v", val)
-					}
-				}
+				args = toStringMap(rawArgs)
 			}
 
 			if len(args) > 0 {
@@ -207,25 +208,7 @@ func parseToolCallFormat(response string) []schema.ToolCall {
 		}
 
 		if err := json.Unmarshal([]byte(block.JSONContent), &parsed); err == nil && parsed.Name != "" {
-			args := make(map[string]string)
-			for k, v := range parsed.Arguments {
-				switch val := v.(type) {
-				case string:
-					args[k] = val
-				case float64:
-					args[k] = fmt.Sprintf("%v", val)
-				case int:
-					args[k] = fmt.Sprintf("%d", val)
-				case bool:
-					args[k] = fmt.Sprintf("%v", val)
-				default:
-					if b, err := json.Marshal(val); err == nil {
-						args[k] = string(b)
-					} else {
-						args[k] = fmt.Sprintf("%v", val)
-					}
-				}
-			}
+			args := toStringMap(parsed.Arguments)
 
 			calls = append(calls, newToolCall(parsed.Name, argsToJSON(args)))
 		}

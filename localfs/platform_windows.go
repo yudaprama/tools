@@ -9,12 +9,6 @@ import (
 	"time"
 )
 
-// FileTimeStat contains file time information
-type FileTimeStat struct {
-	CreatedTime    time.Time
-	LastAccessTime time.Time
-}
-
 // getFileTimes extracts file times from os.FileInfo
 func getFileTimes(info os.FileInfo) *FileTimeStat {
 	stat, ok := info.Sys().(*syscall.Win32FileAttributeData)

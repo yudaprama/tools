@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"time"
@@ -81,34 +80,23 @@ func (p *DuckDuckGoProvider) Query(ctx context.Context, query string, params *Se
 
 	fullURL := fmt.Sprintf("%s?%s", endpoint, queryParams.Encode())
 
-	// Create request
-	req, err := http.NewRequestWithContext(ctx, "GET", fullURL, nil)
+	req, err := newGetRequest(ctx, fullURL, map[string]string{
+		"User-Agent": "Veridium/1.0",
+	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
+		return nil, err
 	}
 
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("User-Agent", "Veridium/1.0")
-
-	// Execute request
 	startTime := time.Now()
-	resp, err := p.httpClient.Do(req)
+	reader, cleanup, err := httpDo(ctx, p.httpClient, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to execute request: %w", err)
+		return nil, err
 	}
-	defer func() { _ = resp.Body.Close() }()
-
-	costTime := time.Since(startTime).Milliseconds()
-
-	// Check response status
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("duckduckgo API returned status %d: %s", resp.StatusCode, string(body))
-	}
+	defer cleanup()
 
 	// Parse response
 	var ddgResp DuckDuckGoResponse
-	if err := json.NewDecoder(resp.Body).Decode(&ddgResp); err != nil {
+	if err := json.NewDecoder(reader).Decode(&ddgResp); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
@@ -117,16 +105,11 @@ func (p *DuckDuckGoProvider) Query(ctx context.Context, query string, params *Se
 
 	// Add abstract as first result if available
 	if ddgResp.AbstractText != "" && ddgResp.AbstractURL != "" {
-		parsedURL := ""
-		if u, err := url.Parse(ddgResp.AbstractURL); err == nil {
-			parsedURL = u.Hostname()
-		}
-
 		results = append(results, UniformSearchResult{
 			Category:  "general",
 			Content:   ddgResp.AbstractText,
 			Engines:   []string{"duckduckgo"},
-			ParsedUrl: parsedURL,
+			ParsedUrl: hostnameFromURL(ddgResp.AbstractURL),
 			Score:     1.0,
 			Title:     ddgResp.Heading,
 			URL:       ddgResp.AbstractURL,
@@ -138,23 +121,16 @@ func (p *DuckDuckGoProvider) Query(ctx context.Context, query string, params *Se
 		// Try to parse as a single topic
 		var topic DuckDuckGoRelatedTopic
 		if err := json.Unmarshal(topicRaw, &topic); err == nil && topic.FirstURL != "" {
-			parsedURL := ""
-			if u, err := url.Parse(topic.FirstURL); err == nil {
-				parsedURL = u.Hostname()
-			}
-
-			// Extract title from Text (usually format: "Title Description")
 			title := topic.Text
-			content := topic.Text
 			if len(title) > 100 {
 				title = title[:100] + "..."
 			}
 
 			results = append(results, UniformSearchResult{
 				Category:  "general",
-				Content:   content,
+				Content:   topic.Text,
 				Engines:   []string{"duckduckgo"},
-				ParsedUrl: parsedURL,
+				ParsedUrl: hostnameFromURL(topic.FirstURL),
 				Score:     0.8,
 				Title:     title,
 				URL:       topic.FirstURL,
@@ -170,22 +146,16 @@ func (p *DuckDuckGoProvider) Query(ctx context.Context, query string, params *Se
 					continue
 				}
 
-				parsedURL := ""
-				if u, err := url.Parse(groupTopic.FirstURL); err == nil {
-					parsedURL = u.Hostname()
-				}
-
 				title := groupTopic.Text
-				content := groupTopic.Text
 				if len(title) > 100 {
 					title = title[:100] + "..."
 				}
 
 				results = append(results, UniformSearchResult{
 					Category:  "general",
-					Content:   content,
+					Content:   groupTopic.Text,
 					Engines:   []string{"duckduckgo"},
-					ParsedUrl: parsedURL,
+					ParsedUrl: hostnameFromURL(groupTopic.FirstURL),
 					Score:     0.7,
 					Title:     title,
 					URL:       groupTopic.FirstURL,
@@ -200,7 +170,7 @@ func (p *DuckDuckGoProvider) Query(ctx context.Context, query string, params *Se
 	}
 
 	return &UniformSearchResponse{
-		CostTime:      costTime,
+		CostTime:      elapsed(startTime),
 		Query:         query,
 		ResultNumbers: len(results),
 		Results:       results,
