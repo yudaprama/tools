@@ -17,6 +17,11 @@ type Paragraph struct {
 	x *wml.CT_P
 }
 
+// NewParagraph constructs a Paragraph from a document and a raw XML pointer.
+func NewParagraph(d *Document, x *wml.CT_P) Paragraph {
+	return Paragraph{d, x}
+}
+
 // X returns the inner wrapped XML type.
 func (p Paragraph) X() *wml.CT_P {
 	return p.x
